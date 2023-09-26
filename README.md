@@ -1,3 +1,7 @@
+<p float="center">
+  <img src="Figures/samples_dataset.png" width="1000" />
+</p>
+
 # Exposing the Unseen: Exposure Time Emulation for Offline Benchmarking of Vision Algorithms
 
 This repository contains the code used in our paper *Exposing the Unseen: Exposure Time Emulation for Offline Benchmarking of Vision Algorithms* submitted at ICRA2024. 
