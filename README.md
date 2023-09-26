@@ -26,9 +26,27 @@ Our preprint is available on [Arxiv](https://doi.org/10.48550/arXiv.2309.13139) 
 
 ## BorealHDR Dataset
 
-<img align="right" src="Figures/photo_backpack.jpg" width="300" height="" />
+<img align="right" src="Figures/bracketing.gif" width="500" height="" />
 
 **The BorealHDR dataset and the code are in preparation. They will be added soon!** 
+
+The BorealHDR Dataset was acquired at the Montmorency Forest in Québec City, Canada.
+In winter, this environment creates several HDR scenes coming from snow and trees.
+It was developed mainly to be used with our emulation technique.
+
+The images were collected using the bracketing technique with six exposure times: **1, 2, 4, 8, 16, and 32 ms**.
+A ground truth is provided using the 3D lidar data and the *Iterative Closest Point (ICP)* algorithm 
+
+BorealHDR contains:
+
+    - 50 trajectories
+    - 8.4 km
+    - 4 hours of data
+    - 333 813 images
+    - 3D lidar point clouds
+    - IMU measurements
+    - GPS data
+
 
 ## Citing
 
