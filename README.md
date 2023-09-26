@@ -43,6 +43,7 @@ BorealHDR contains:
     - 8.4 km
     - 4 hours of data
     - 333 813 images
+    - Ground truth 3D maps
     - 3D lidar point clouds
     - IMU measurements
     - GPS data
