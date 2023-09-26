@@ -4,9 +4,9 @@
 
 # Exposing the Unseen: Exposure Time Emulation for Offline Benchmarking of Vision Algorithms
 
-This repository contains the code used in our paper *Exposing the Unseen: Exposure Time Emulation for Offline Benchmarking of Vision Algorithms* submitted at ICRA2024. 
+[![DOI](https://zenodo.org/badge/DOI/10.48550/arxiv.2309.110718.svg)](https://doi.org/10.48550/arXiv.2309.13139)
 
-Our preprint is available on [Arxiv](https://doi.org/10.48550/arXiv.2309.13139) and our complementary video is on Youtube:
+This repository contains the code used in our paper *Exposing the Unseen: Exposure Time Emulation for Offline Benchmarking of Vision Algorithms* submitted at ICRA2024. 
 
 [![Exposing the Unseen](https://img.youtube.com/vi/btkO12L6AYs/0.jpg)](https://youtu.be/btkO12L6AYs)
 
