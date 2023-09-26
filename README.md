@@ -26,7 +26,7 @@ This repository contains the code used in our paper *Exposing the Unseen: Exposu
 
 ## BorealHDR Dataset
 
-<img align="right" src="Figures/dataset_acquisition.gif" width="500" height="" />
+<img align="right" src="Figures/dataset_acquisition_bracketing.gif" width="500" height="" />
 
 **The BorealHDR dataset and the code are in preparation. They will be added soon!** 
 
