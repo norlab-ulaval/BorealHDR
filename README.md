@@ -11,7 +11,24 @@ Our preprint is available on [Arxiv](https://doi.org/10.48550/arXiv.2309.13139) 
 [![Exposing the Unseen](https://img.youtube.com/vi/btkO12L6AYs/0.jpg)](https://youtu.be/btkO12L6AYs)
 
 
-### The BorealHDR dataset and the code are in preparation. They will be added soon! 
+## Menu
+
+  - [**Emulator**](#emulator)
+
+  - [**BorealHDR Dataset**](#borealhdr-dataset)
+
+  - [**Citing**](#citing)
+
+
+## Emulator
+
+**The BorealHDR dataset and the code are in preparation. They will be added soon!**
+
+## BorealHDR Dataset
+
+<img align="right" src="Figures/photo_backpack.jpg" width="300" height="" />
+
+**The BorealHDR dataset and the code are in preparation. They will be added soon!** 
 
 ## Citing
 
