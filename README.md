@@ -4,7 +4,8 @@ This repository contains the code used in our paper *Exposing the Unseen: Exposu
 
 Our preprint is available on [Arxiv](https://doi.org/10.48550/arXiv.2309.13139) and our complementary video is on Youtube:
 
-[![Exposing the Unseen](https://img.youtube.com/vi/QxLX-qNd34o/0.jpg)](https://www.youtube.com/watch?v=QxLX-qNd34o&ab_channel=norlab)
+[![Exposing the Unseen](https://img.youtube.com/vi/btkO12L6AYs/0.jpg)](https://youtu.be/btkO12L6AYs)
+
 
 ### The BorealHDR dataset and the code are in preparation. They will be added soon! 
 
