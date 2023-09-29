@@ -1,5 +1,5 @@
 <p float="center">
-  <img src="Figures/samples_dataset.png" width="1000" />
+  <img src="figures_readme/samples_dataset.png" width="1000" />
 </p>
 
 # Exposing the Unseen: Exposure Time Emulation for Offline Benchmarking of Vision Algorithms
@@ -8,7 +8,7 @@
 
 This repository contains the code used in our paper *Exposing the Unseen: Exposure Time Emulation for Offline Benchmarking of Vision Algorithms* submitted at ICRA2024. 
 
-[![Exposing the Unseen](https://img.youtube.com/vi/btkO12L6AYs/0.jpg)](https://youtu.be/btkO12L6AYs)
+[![Exposing the Unseen](figures_readme/thumbnail_video.png)](https://youtu.be/btkO12L6AYs)
 
 
 ## Menu
@@ -26,7 +26,7 @@ This repository contains the code used in our paper *Exposing the Unseen: Exposu
 
 ## BorealHDR Dataset
 
-<img align="right" src="Figures/dataset_acquisition.gif" width="500" height="" />
+<img align="right" src="figures_readme/dataset_acquisition.gif" width="500" height="" />
 
 **The BorealHDR dataset and the code are in preparation. They will be added soon!** 
 
