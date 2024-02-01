@@ -1,5 +1,5 @@
 <p float="center">
-  <img src="figures_readme/samples_dataset.png" width="1000" />
+  <img src="figures_readme/samples_dataset.jpg" width="1000" />
 </p>
 
 # Exposing the Unseen: Exposure Time Emulation for Offline Benchmarking of Vision Algorithms
