@@ -6,7 +6,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.48550/arxiv.2309.110718.svg)](https://doi.org/10.48550/arXiv.2309.13139)
 
-This repository contains the code used in our paper *Exposing the Unseen: Exposure Time Emulation for Offline Benchmarking of Vision Algorithms* submitted at ICRA2024. 
+This repository contains the code used in our paper *Exposing the Unseen: Exposure Time Emulation for Offline Benchmarking of Vision Algorithms* submitted at IROS2024. 
 
 [![Exposing the Unseen](figures_readme/thumbnail_video.png)](https://youtu.be/btkO12L6AYs)
 
@@ -39,10 +39,10 @@ A ground truth is provided using the 3D lidar data and the *Iterative Closest Po
 
 BorealHDR contains:
 
-    - 50 trajectories
-    - 8.4 km
-    - 4 hours of data
-    - 333 813 images
+    - 55 trajectories
+    - 10 km
+    - 5 hours of data
+    - 393 238 images
     - Ground truth 3D maps
     - 3D lidar point clouds
     - IMU measurements

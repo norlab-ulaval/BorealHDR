@@ -1,0 +1,25 @@
+version: '3'
+services:
+  service_emulator:
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile
+    container_name: borealhdr_container
+    stdin_open: true
+    tty: true
+    privileged: true
+    network_mode: "host"
+    environment:
+      - DISPLAY=${DISPLAY}
+    command: ["bash"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+    volumes:
+      - /dev/shm:/dev/shm
+      - ../:/home/user/code
+      # - <Add directory dataset>:/home/user/code/dataset_mounted/ #Mount directory to dataset
+  

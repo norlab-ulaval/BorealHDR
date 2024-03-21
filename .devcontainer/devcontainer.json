@@ -1,0 +1,24 @@
+{
+    "name": "borealhdr-dev",
+    "dockerComposeFile": [
+        "docker-compose.yaml" // the docker compose file that we want to run
+    ],
+    "workspaceFolder": "/home/user/code/",
+	// "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/project,type=bind",
+    "service": "service_emulator", // The service in docker-compose.yml that we want vs code to use as a dev containers 
+    "shutdownAction": "stopCompose",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "KevinRose.vsc-python-indent",
+                "njpwerner.autodocstring",
+                "mechatroner.rainbow-csv",
+                "redhat.vscode-yaml",
+                "flyfly6.terminal-in-status-bar",
+                "ms-azuretools.vscode-docker",
+                "ms-vscode.cmake-tools"
+            ]
+        }
+    }
+}
