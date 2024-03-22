@@ -36,8 +36,8 @@ python3 emulator_threads.py
 ```
 The `emulator_threads.py` loads `parameters.yaml` file. You can adapt some parameters to choose which automatic-exposure technique to use and also some debugs parameters. Note that `emulator_threads.py` uses multiple threads to accelerate the processes. You can then emulate multiple automatic-exposure algorithms by un-commenting methods in `automatic_exposure_techniques` from `parameters.yaml`. The following table describes the available parameters related to the emulation. 
 
-| Parameter                        | Description    | Values (default first) |
-| :---                             |     :---:      |                   ---: |
+| Parameter                        |                    <div style="width:290px">Description</div>                   | Values (default first) |
+| :---                             |                      :---:                         |                   ---: |
 | `exposure_time_init`             | Exposure time of the first emulated image       | `4.0`                       |
 | `use_sample`                     | Boolean: use the sample dataset or the full one       | `True`/`False`                       |
 | `location_acquisition`           | To select the good folder, choose the location from where the sequence you want to emulate was acquired       | `"ulaval_campus"`/`"belair"`/`"forest_20"`/`"forest_21"`/                       |
