@@ -24,9 +24,22 @@ This repository contains the code used in our paper *Exposing the Unseen: Exposu
 
 We created a Dockerfile to easily run our code using a docker-compose.yaml.
 
+### Dependencies
+
+Install Docker using this website: (https://docs.docker.com/engine/install/)[https://docs.docker.com/engine/install/]
+
+#### Running the emulator
+
+First, start by cloning this repository on your computer. 
+```bash
+git clone git@github.com:norlab-ulaval/BorealHDR.git
+```
 If you have downloaded the dataset in another directory, the first step is to modify the last line of `.devcontainer/docker-compose.yaml` to mount the location of your data into the container at `/home/user/code/dataset_mount_point/`. If you did not download the dataset, we added a small part of a trajectory direclty into this repository to enable testing our pipeline.
 
 Then, you can open the devcontainer in `vscode`, or build the image with `docker compose up --build`.
+```bash
+docker compose up --build
+```
 
 When your inside the docker container, you can direclty emulate images from the dataset by running
 
