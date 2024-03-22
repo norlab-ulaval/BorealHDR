@@ -1,6 +1,4 @@
 EMULATION:
-      emulation_method: "radiance"
-      selection_method: "closer_least_sat"
       exposure_time_init: 4.0
       use_sample: True
       location_acquisition: "ulaval_campus"

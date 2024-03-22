@@ -37,8 +37,6 @@ if __name__=="__main__":
 
     #######################################################
     # VARIABLES
-    EMULATION_METHOD = parameters["EMULATION"]["emulation_method"]
-    SELECTION_METHOD = parameters["EMULATION"]["selection_method"]
     LOCATION_ACQUISITION = parameters["EMULATION"]["location_acquisition"]
     EXPERIMENT = parameters["EMULATION"]["experiment"]
     SAVE_DEPTH = parameters["EMULATION"]["depth_emulated_imgs"]
@@ -66,8 +64,8 @@ def emulate(metric_full):
 
     display_left_class = Image_Display("left")
     display_right_class = Image_Display("right")
-    emulator_left_class = Image_Emulator(PATH_BRACKETING_IMGS_LEFT, EMULATION_METHOD, SELECTION_METHOD, COLOR)
-    emulator_right_class = Image_Emulator(PATH_BRACKETING_IMGS_RIGHT, EMULATION_METHOD, SELECTION_METHOD, COLOR)
+    emulator_left_class = Image_Emulator(PATH_BRACKETING_IMGS_LEFT, "radiance", "closer_least_sat", COLOR)
+    emulator_right_class = Image_Emulator(PATH_BRACKETING_IMGS_RIGHT, "radiance", "closer_least_sat", COLOR)
 
     metric_class = Metric(metric, brightness_percentage)
 
