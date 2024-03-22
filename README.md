@@ -22,8 +22,6 @@ This repository contains the code used in our paper *Exposing the Unseen: Exposu
 
 ## Emulator
 
-**The whole BorealHDR dataset and the code are in preparation. They will be added soon!**
-
 We created a Dockerfile to easily run our code using a docker-compose.yaml.
 
 If you have downloaded the dataset in another directory, the first step is to modify the last line of `.devcontainer/docker-compose.yaml` to mount the location of your data into the container at `/home/user/code/dataset_mount_point/`. If you did not download the dataset, we added a small part of a trajectory direclty into this repository to enable testing our pipeline.
@@ -44,7 +42,7 @@ The results from the emulation are in `/home/user/code/output/emulated_images/`.
 
 <img align="right" src="figures_readme/dataset_acquisition.gif" width="500" height="" />
 
-**The BorealHDR dataset and the code are in preparation. They will be added soon!** 
+**Due to its size, the entire BorealHDR dataset is in preparation. It will be added soon!**
 
 The BorealHDR Dataset was acquired at the Montmorency Forest in Québec City, Canada.
 In winter, this environment creates several HDR scenes coming from snow and trees.
