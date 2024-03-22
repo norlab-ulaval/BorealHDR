@@ -2,7 +2,7 @@ import numpy as np
 import os
 from tqdm import tqdm
 import pandas as pd
-import json
+import yaml
 import argparse
 from pathlib import Path
 import threading
@@ -30,51 +30,33 @@ def create_dataframe(path_imgs, bracket_values):
     return df
 
 if __name__=="__main__":
-    parser = argparse.ArgumentParser(description="Emulate from a bracketing sequence")
-    parser.add_argument("-x", "--experiment", help="Folder name of the sequence", required=False, default="backpack_2023-09-25-15-05-03")
-    parser.add_argument("-s", "--save_path", help="Save path", required=False, default="/home/user/code/output/emulated_images/")
-    args = parser.parse_args()
+
+    parameters_file = "/home/user/code/parameters.yaml"
+    with open(parameters_file, 'r') as file:
+        parameters = yaml.safe_load(file)
 
     #######################################################
     # VARIABLES
-    BASE_PATH = Path(__file__).absolute().parents[1]
-
-    EMULATION_METHOD = "radiance"
-    SELECTION_METHOD = "closer_least_sat"
-    ACTION = "save"
-    SAVE_DEPTH = 8
-    COLOR = True
-    AE_METRIC = [
-        # "classical-30",
-        "classical-50",
-        # "classical-70",
-        # "manual-0",
-        # "gradient-0",
-        # "ewg-0",
-        # "softperc-0"
-    ]
-
-    EXPERIMENT = args.experiment
-    SAVE_PATH = Path(args.save_path)
-    if "09-25" in EXPERIMENT:
-        LOCATION_ACQUISITION = "ulaval_campus"
+    EMULATION_METHOD = parameters["EMULATION"]["emulation_method"]
+    SELECTION_METHOD = parameters["EMULATION"]["selection_method"]
+    LOCATION_ACQUISITION = parameters["EMULATION"]["location_acquisition"]
+    EXPERIMENT = parameters["EMULATION"]["experiment"]
+    SAVE_DEPTH = parameters["EMULATION"]["depth_emulated_imgs"]
+    COLOR = parameters["EMULATION"]["emulated_in_color"]
+    AE_METRIC = parameters["EMULATION"]["automatic_exposure_techniques"]
+    ACTION = parameters["EMULATION"]["save_or_show_emulated_imgs"]
+    SAVE_PATH = Path(parameters["EMULATION"]["save_path"])
+    
+    if parameters["EMULATION"]["use_sample"]:
         DATASET_PATH = Path(f"../data_sample/{LOCATION_ACQUISITION}/")
-    elif "09-27" in EXPERIMENT:
-        LOCATION_ACQUISITION = "belair"
-        DATASET_PATH = Path(f"../dataset_mount_point/{LOCATION_ACQUISITION}/")
-    elif "04-20" in EXPERIMENT:
-        LOCATION_ACQUISITION = "forest_20"
-        DATASET_PATH = Path(f"../dataset_mount_point/{LOCATION_ACQUISITION}/")
-    elif "04-21" in EXPERIMENT:
-        LOCATION_ACQUISITION = "forest_21"
-        DATASET_PATH = Path(f"../dataset_mount_point/{LOCATION_ACQUISITION}/")
     else:
-        print("Wrong dataset name!")
+        DATASET_PATH = Path(f"../dataset_mount_point/{LOCATION_ACQUISITION}/")
+
     PATH_BRACKETING_IMGS_LEFT = DATASET_PATH / EXPERIMENT / "camera_l"
     PATH_BRACKETING_IMGS_RIGHT = DATASET_PATH / EXPERIMENT / "camera_r"
 
     BRACKETING_VALUES = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 32.0])
-    EXPOSURE_TIME_INIT = 4.0
+    EXPOSURE_TIME_INIT = parameters["EMULATION"]["exposure_time_init"]
     #########################################################
 
 def emulate(metric_full):

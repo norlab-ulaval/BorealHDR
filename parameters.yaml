@@ -1,0 +1,20 @@
+EMULATION:
+      emulation_method: "radiance"
+      selection_method: "closer_least_sat"
+      exposure_time_init: 4.0
+      use_sample: True
+      location_acquisition: "ulaval_campus"
+      experiment: "backpack_2023-09-25-15-05-03"
+      depth_emulated_imgs: 8
+      emulated_in_color: True
+      automatic_exposure_techniques: [
+            # "classical-30",
+            "classical-50",
+            # "classical-70",
+            # "manual-0",
+            # "gradient-0",
+            # "ewg-0",
+            # "softperc-0"
+            ]
+      save_or_show_emulated_imgs: "save"
+      save_path: "/home/user/code/output/emulated_images/"
