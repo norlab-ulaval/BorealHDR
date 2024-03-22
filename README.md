@@ -22,7 +22,23 @@ This repository contains the code used in our paper *Exposing the Unseen: Exposu
 
 ## Emulator
 
-**The BorealHDR dataset and the code are in preparation. They will be added soon!**
+**The whole BorealHDR dataset and the code are in preparation. They will be added soon!**
+
+We created a Dockerfile to easily run our code using a docker-compose.yaml.
+
+If you have downloaded the dataset in another directory, the first step is to modify the last line of `.devcontainer/docker-compose.yaml` to mount the location of your data into the container at `/home/user/code/dataset_mount_point/`. If you did not download the dataset, we added a small part of a trajectory direclty into this repository to enable testing our pipeline.
+
+Then, you can open the devcontainer in `vscode`, or build the image with `docker compose up --build`.
+
+When your inside the docker container, you can direclty emulate images from the dataset by running
+
+```bash
+cd /home/user/code/scripts/
+python3 emulator_threads.py
+```
+In `emulator_threads.py`, you can adapt some parameters to choose which automatic-exposure technique to use and also some debugs parameters.
+
+The results from the emulation are in `/home/user/code/output/emulated_images/`.
 
 ## BorealHDR Dataset
 
