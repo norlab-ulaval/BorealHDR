@@ -49,7 +49,7 @@ In winter, this environment creates several HDR scenes coming from snow and tree
 It was developed mainly to be used with our emulation technique.
 
 The images were collected using the bracketing technique with six exposure times: **1, 2, 4, 8, 16, and 32 ms**.
-A ground truth is provided using the 3D lidar data and the *Iterative Closest Point (ICP)* algorithm 
+A ground truth is provided using the 3D lidar data and a lidar-inertial-SLAM algorithm based on [Libpointmatcher](https://github.com/norlab-ulaval/libpointmatcher).
 
 BorealHDR contains:
 
