@@ -36,7 +36,7 @@ When your inside the docker container, you can direclty emulate images from the 
 cd /home/user/code/scripts/
 python3 emulator_threads.py
 ```
-In `emulator_threads.py`, you can adapt some parameters to choose which automatic-exposure technique to use and also some debugs parameters.
+In `emulator_threads.py`, you can adapt some parameters to choose which automatic-exposure technique to use and also some debugs parameters. Note that this script uses multiple threads to accelerate the processes. You can then emulate multiple automatic-exposure algorithms by un-commenting methods in `AE_METRIC`.
 
 The results from the emulation are in `/home/user/code/output/emulated_images/`.
 
