@@ -26,7 +26,7 @@ We created a Dockerfile to easily run our code using a docker-compose.yaml.
 
 ### Dependencies
 
-Install Docker using this website: (https://docs.docker.com/engine/install/)[https://docs.docker.com/engine/install/]
+If you want to use the docker container, you have to install Docker using this website: [https://docs.docker.com/engine/install/](https://docs.docker.com/engine/install/)
 
 #### Running the emulator
 
@@ -34,6 +34,9 @@ First, start by cloning this repository on your computer.
 ```bash
 git clone git@github.com:norlab-ulaval/BorealHDR.git
 ```
+
+#### Docker
+
 If you have downloaded the dataset in another directory, the first step is to modify the last line of `.devcontainer/docker-compose.yaml` to mount the location of your data into the container at `/home/user/code/dataset_mount_point/`. If you did not download the dataset, we added a small part of a trajectory direclty into this repository to enable testing our pipeline.
 
 Then, you can open the devcontainer in `vscode`, or build the image with `docker compose up --build`.
@@ -47,12 +50,32 @@ When your inside the docker container, you can direclty emulate images from the 
 cd /home/user/code/scripts/
 python3 emulator_threads.py
 ```
+
+####  Python virtual environment
+
+Instead of using the docker container, you can also direclty run the code locally using a virtual environment. First you have to create the python virtual environment and install the dependencies from the `requirements.txt` file:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+Then, you can adapt the `parameters.yaml` file to define the position of the dataset. The default path to the dataset is to `../data_sample/`. To emulate images, you need to run the script `emulator_threads.py`
+
+```bash
+cd scripts/
+python emulator_threads.py
+```
+
+### Parameters
+
 The `emulator_threads.py` loads `parameters.yaml` file. You can adapt some parameters to choose which automatic-exposure technique to use and also some debugs parameters. Note that `emulator_threads.py` uses multiple threads to accelerate the processes. You can then emulate multiple automatic-exposure algorithms by un-commenting methods in `automatic_exposure_techniques` from `parameters.yaml`. The following table describes the available parameters related to the emulation. 
 
 | Parameter                        |                    Description                  | Values (default first) |
 | :---                             |                      :---                         |                   ---: |
 | `exposure_time_init`             | Exposure time of the first emulated image       | `4.0`                       |
-| `use_sample`                     | Boolean: use the sample dataset or the full one       | `True`<br />`False`                       |
+| `dataset_folder`                 | Parent path to the dataset       | `"../data_sample/"`                      |
 | `location_acquisition`           | To select the good folder, choose the location from where the sequence you want to emulate was acquired       | `"ulaval_campus"`<br />`"belair"`<br />`"forest_20"`<br />`"forest_21"`                       |
 | `experiment`                     | Sequence name       | `"backpack_2023-09-25-15-05-03"`                       |
 | `depth_emulated_imgs`            | Emulate images in 8bits or 12bits       | `8`<br />`12`                       |

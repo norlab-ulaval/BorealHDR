@@ -31,12 +31,13 @@ def create_dataframe(path_imgs, bracket_values):
 
 if __name__=="__main__":
 
-    parameters_file = "/home/user/code/parameters.yaml"
+    parameters_file = "../parameters.yaml"
     with open(parameters_file, 'r') as file:
         parameters = yaml.safe_load(file)
 
     #######################################################
     # VARIABLES
+    DATASET_FOLDER = parameters["EMULATION"]["dataset_folder"]
     LOCATION_ACQUISITION = parameters["EMULATION"]["location_acquisition"]
     EXPERIMENT = parameters["EMULATION"]["experiment"]
     SAVE_DEPTH = parameters["EMULATION"]["depth_emulated_imgs"]
@@ -44,11 +45,7 @@ if __name__=="__main__":
     AE_METRIC = parameters["EMULATION"]["automatic_exposure_techniques"]
     ACTION = parameters["EMULATION"]["save_or_show_emulated_imgs"]
     SAVE_PATH = Path(parameters["EMULATION"]["save_path"])
-    
-    if parameters["EMULATION"]["use_sample"]:
-        DATASET_PATH = Path(f"../data_sample/{LOCATION_ACQUISITION}/")
-    else:
-        DATASET_PATH = Path(f"../dataset_mount_point/{LOCATION_ACQUISITION}/")
+    DATASET_PATH = Path(f"{DATASET_FOLDER}/{LOCATION_ACQUISITION}/")
 
     PATH_BRACKETING_IMGS_LEFT = DATASET_PATH / EXPERIMENT / "camera_l"
     PATH_BRACKETING_IMGS_RIGHT = DATASET_PATH / EXPERIMENT / "camera_r"
