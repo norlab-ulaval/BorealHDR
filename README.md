@@ -28,7 +28,7 @@ We created a Dockerfile to easily run our code using a docker-compose.yaml.
 
 If you want to use the docker container, you have to install Docker using this website: [https://docs.docker.com/engine/install/](https://docs.docker.com/engine/install/)
 
-#### Running the emulator
+### Running the emulator
 
 First, start by cloning this repository on your computer. 
 ```bash
