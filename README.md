@@ -8,7 +8,7 @@
 
 This repository contains the code used in our paper *Exposing the Unseen: Exposure Time Emulation for Offline Benchmarking of Vision Algorithms* submitted at IROS2024. 
 
-[![Exposing the Unseen](figures_readme/thumbnail_video.jpg)](https://youtu.be/btkO12L6AYs)
+[![Exposing the Unseen](figures_readme/thumbnail_video.jpg)](https://youtu.be/JN9faAvCRkU)
 
 
 ## Menu
