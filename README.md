@@ -117,7 +117,7 @@ If you use our emulator or our BorealHDR dataset in your work, please cite [our 
 @misc{gamache2023exposing,
       title={{Exposing the Unseen: Exposure Time Emulation for Offline Benchmarking of Vision Algorithms}}, 
       author={Olivier Gamache and Jean-Michel Fortin and Matěj Boxan and Maxime Vaidis and François Pomerleau and Philippe Giguère},
-      year={2023},
+      year={2024},
       eprint={2309.13139},
       archivePrefix={arXiv},
       primaryClass={cs.RO}
