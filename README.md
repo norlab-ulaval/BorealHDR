@@ -6,7 +6,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.48550/arxiv.2309.110718.svg)](https://doi.org/10.48550/arXiv.2309.13139)
 
-This repository contains the code used in our paper *Exposing the Unseen: Exposure Time Emulation for Offline Benchmarking of Vision Algorithms* submitted at IROS2024. 
+This repository contains the code used in our paper *Exposing the Unseen: Exposure Time Emulation for Offline Benchmarking of Vision Algorithms* accepted at IROS2024. 
 
 [![Exposing the Unseen](figures_readme/thumbnail_video.jpg)](https://youtu.be/JN9faAvCRkU)
 
