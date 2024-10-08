@@ -110,10 +110,12 @@ BorealHDR contains:
 
 ### Download
 
-We provide a compressed version of the dataset in the following tables. In this version, the images still have a depth of 12-bits, but they have been compressed to reduce the overall size of the dataset.
+We provide a compressed version of the dataset in the following tables. In this version, the images still have a depth of 12-bits, but they have been compressed to reduce the overall size of the dataset. The whole dataset will come part by part throught the following days.
 
-Once you downloaded a trajectory, you will have to decompress it before using it with the emulator
+Once you downloaded a trajectory, you will have to decompress it before using it with the emulator.
 
+
+<div align="center">
 
 | Mont-Bélair  | Size (GB) | Download Link |
 |-------------|------------|---------------|
@@ -123,6 +125,8 @@ Once you downloaded a trajectory, you will have to decompress it before using it
 | backpack_2023-09-27-13-25-44 | 6.1        | [Download](http://norlab2.s3.valeria.science/BorealHDR/belair/backpack_2023-09-27-13-25-44.zip?AWSAccessKeyId=0H3T890M5GYEV6TJW6FP&Expires=2333211645&Signature=kWPXm1qL2uQuuTOBx1nJ9f3IKE0%3D) |
 | backpack_2023-09-27-13-29-22 | 8.4        | [Download](http://norlab2.s3.valeria.science/BorealHDR/belair/backpack_2023-09-27-13-29-22.zip?AWSAccessKeyId=0H3T890M5GYEV6TJW6FP&Expires=2333211660&Signature=bAVqWxNNARlSugUienoIKGJca5A%3D) |
 | backpack_2023-09-27-13-34-17 | 7.9        | [Download](http://norlab2.s3.valeria.science/BorealHDR/belair/backpack_2023-09-27-13-34-17.zip?AWSAccessKeyId=0H3T890M5GYEV6TJW6FP&Expires=2333211678&Signature=wEyGuxD%2Fxx5NOv7DpgUiVrEo7Ek%3D) |
+
+</div>
 
 
 ## Citing
