@@ -37,18 +37,16 @@ if __name__=="__main__":
 
     #######################################################
     # VARIABLES
-    DATASET_FOLDER = parameters["EMULATION"]["dataset_folder"]
-    LOCATION_ACQUISITION = parameters["EMULATION"]["location_acquisition"]
+    DATASET_FOLDER = Path(parameters["EMULATION"]["dataset_folder"])
     EXPERIMENT = parameters["EMULATION"]["experiment"]
     SAVE_DEPTH = parameters["EMULATION"]["depth_emulated_imgs"]
     COLOR = parameters["EMULATION"]["emulated_in_color"]
     AE_METRIC = parameters["EMULATION"]["automatic_exposure_techniques"]
     ACTION = parameters["EMULATION"]["save_or_show_emulated_imgs"]
     SAVE_PATH = Path(parameters["EMULATION"]["save_path"])
-    DATASET_PATH = Path(f"{DATASET_FOLDER}/{LOCATION_ACQUISITION}/")
 
-    PATH_BRACKETING_IMGS_LEFT = DATASET_PATH / EXPERIMENT / "camera_l"
-    PATH_BRACKETING_IMGS_RIGHT = DATASET_PATH / EXPERIMENT / "camera_r"
+    PATH_BRACKETING_IMGS_LEFT = DATASET_FOLDER / EXPERIMENT / "camera_left"
+    PATH_BRACKETING_IMGS_RIGHT = DATASET_FOLDER / EXPERIMENT / "camera_right"
 
     BRACKETING_VALUES = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 32.0])
     EXPOSURE_TIME_INIT = parameters["EMULATION"]["exposure_time_init"]
