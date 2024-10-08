@@ -118,7 +118,7 @@ Once you downloaded a trajectory, you will have to decompress it before using it
 <div align="center">
 
 | Mont-Bélair  | Size (GB) | Download Link |
-|-------------|------------|---------------|
+|-------------|:----:|---------------|
 | backpack_2023-09-27-12-46-32 | 6.7        | [Download](http://norlab2.s3.valeria.science/BorealHDR/belair/backpack_2023-09-27-12-46-32.zip?AWSAccessKeyId=0H3T890M5GYEV6TJW6FP&Expires=2333210946&Signature=6QTw0tf4sTmXe%2FEalIBYtVGueJs%3D) |
 | backpack_2023-09-27-12-51-03 | 4.6        | [Download](http://norlab2.s3.valeria.science/BorealHDR/belair/backpack_2023-09-27-12-51-03.zip?AWSAccessKeyId=0H3T890M5GYEV6TJW6FP&Expires=2333211566&Signature=iC1rvVNU%2F53Bs%2BGhZFwXf%2FtHZvM%3D) |
 | backpack_2023-09-27-13-20-03 | 6.3        | [Download](http://norlab2.s3.valeria.science/BorealHDR/belair/backpack_2023-09-27-13-20-03.zip?AWSAccessKeyId=0H3T890M5GYEV6TJW6FP&Expires=2333211632&Signature=SSCOzT3NbBNIsp%2B18k7Nu1Biakw%3D) |
