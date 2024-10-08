@@ -35,9 +35,13 @@ First, start by cloning this repository on your computer.
 git clone git@github.com:norlab-ulaval/BorealHDR.git
 ```
 
+#### Download the datset
+
+You can download each trajectory independently in [BorealHDR Dataset](#borealhdr-dataset)'s section. Or, we also added a small part of a trajecotry direclty in this repository to allow quick testing of our setup.
+
 #### Docker
 
-If you have downloaded the dataset in another directory, the first step is to modify the last line of `.devcontainer/docker-compose.yaml` to mount the location of your data into the container at `/home/user/code/dataset_mount_point/`. If you did not download the dataset, we added a small part of a trajectory direclty into this repository to enable testing our pipeline.
+If you have downloaded the [BorealHDR Dataset](#borealhdr-dataset), the first step is to modify the last line of `.devcontainer/docker-compose.yaml` to mount the location of your data into the container at `/home/user/code/dataset_mount_point/`.
 
 Then, you can open the devcontainer in `vscode`, or build the image with `docker compose up --build`.
 ```bash
