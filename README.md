@@ -154,9 +154,10 @@ python3 emulator_threads.py
 ```
 
 ### Download links
--------------------------------------------------------------
 
 You may have to copy-paste the link if directly clicking on `Download` did not work.
+
+-------------------------------------------------------------
 
 <div align="center">
 
