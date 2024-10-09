@@ -116,7 +116,7 @@ BorealHDR contains:
 
 We provide a compressed version of the dataset in the following tables. In this version, the images still have a depth of 12-bits, but they have been compressed to reduce the overall size of the dataset.
 
-Once you downloaded a trajectory, you will have to decompress it before using it with the emulator. You may have to copy-paste the link if directly clicking on 'Download' did not work.
+Once you downloaded a trajectory, you will have to decompress it before using it with the emulator. You may have to copy-paste the link if directly clicking on `Download` did not work.
 
 -------------------------------------------------------------
 
