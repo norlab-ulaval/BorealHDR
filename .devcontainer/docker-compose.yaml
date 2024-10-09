@@ -12,12 +12,6 @@ services:
     environment:
       - DISPLAY=${DISPLAY}
     command: ["bash"]
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              capabilities: [gpu]
     volumes:
       - /dev/shm:/dev/shm
       - ../:/home/user/code
