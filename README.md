@@ -92,8 +92,6 @@ The `emulator_threads.py` loads `parameters.yaml` file. You can adapt some param
 
 <img align="right" src="figures_readme/dataset_acquisition.gif" width="500" height="" />
 
-**Due to its size, the entire BorealHDR dataset is in preparation. It will be added soon!**
-
 The BorealHDR Dataset was acquired at the Montmorency Forest in Québec City, Canada.
 In winter, this environment creates several HDR scenes coming from snow and trees.
 It was developed mainly to be used with our emulation technique.
@@ -114,7 +112,7 @@ BorealHDR contains:
 
 ### Download
 
-We provide a compressed version of the dataset in the following tables. In this version, the images still have a depth of 12-bits, but they have been compressed to reduce the overall size of the dataset.
+We provide a compressed version of the dataset in the following tables. In this version, the images still have a depth of 12-bits, but they have been compressed to reduce the overall size of the dataset. If you are interested by the full resolution version, contact us and we will find a way to share it with you!
 
 Once you downloaded a trajectory, you will have to decompress it before using it with the emulator. You may have to copy-paste the link if directly clicking on `Download` did not work.
 
