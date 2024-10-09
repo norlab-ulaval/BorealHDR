@@ -4,11 +4,7 @@ import os
 from time import time
 
 class Image_Display():
-    def __init__(self, camera):
-        if camera == "left":
-            self.save_folder = "images_l"
-        elif camera == "right":
-            self.save_folder = "images_r"
+    def __init__(self, ):
         return
     
     def show_imgs_og_and_simulated(self, img_og, img_simulated):
@@ -44,7 +40,7 @@ class Image_Display():
         cv2.imshow(title, img_to_show)
         cv2.waitKey()
 
-    def resulting_img(self, img, action="show", path="", index=0, bit=8, color=False):
+    def resulting_img(self, img, bit=8, color=False):
         if bit == 8:
             img_to_show = (img["emulated_img"]/16.0).astype('uint8')
             if color:
@@ -54,18 +50,26 @@ class Image_Display():
         else:
             print("Wrong bit format. Should be 8 or 12.")
             return
-
-        if action == "show":
-            cv2.imshow("Image", img_to_show)
-            cv2.waitKey(33)
-        elif action == "save":
-            self.verify_if_folder_exist_or_create_it(path)
-            complete_path = path / self.save_folder
+        
+        return img_to_show
+            
+    def show_imgs(self, img_l, img_r):
+        imgs_side_by_side = np.hstack((img_l, img_r))
+        imgs_side_by_side = cv2.resize(imgs_side_by_side, (0, 0), fx=0.4, fy=0.4)
+        cv2.imshow("Left: Image Left / Right: Image Right", imgs_side_by_side)
+        cv2.waitKey(33)
+        return
+    
+    
+    def save_imgs(self, img_l, img_to_show_l, img_r, img_to_show_r, action="show", path="", index=0):
+        self.verify_if_folder_exist_or_create_it(path)
+        for camera, img, img_to_show in zip(["images_left", "images_right"], [img_l, img_r], [img_to_show_l, img_to_show_r]):
+            complete_path = path / camera
             self.verify_if_folder_exist_or_create_it(complete_path)
             
             save_image_filename = f"{index:0>5d}"
             cv2.imwrite(str(complete_path / f"{save_image_filename}.png"), img_to_show)
-            f = open(path / f"times_{self.save_folder}.txt","a")
+            f = open(path / f"times_{camera}.txt","a")
             msg = save_image_filename+" "+str(img["timestamp"].split(".")[0])+" "+str(img["target_exposure_time"])+"\n"
             f.write(msg)
             f.close()

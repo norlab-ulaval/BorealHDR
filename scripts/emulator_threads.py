@@ -43,7 +43,7 @@ if __name__=="__main__":
     COLOR = parameters["EMULATION"]["emulated_in_color"]
     AE_METRIC = parameters["EMULATION"]["automatic_exposure_techniques"]
     ACTION = parameters["EMULATION"]["save_or_show_emulated_imgs"]
-    SAVE_PATH = Path(parameters["EMULATION"]["save_path"])
+    SAVE_PATH = Path(parameters["EMULATION"]["save_path"]) / EXPERIMENT
 
     PATH_BRACKETING_IMGS_LEFT = DATASET_FOLDER / EXPERIMENT / "camera_left"
     PATH_BRACKETING_IMGS_RIGHT = DATASET_FOLDER / EXPERIMENT / "camera_right"
@@ -57,8 +57,7 @@ def emulate(metric_full):
     metric = metric_full.split("-")[0]
     brightness_percentage = int(metric_full.split("-")[-1])
 
-    display_left_class = Image_Display("left")
-    display_right_class = Image_Display("right")
+    display_class = Image_Display()
     emulator_left_class = Image_Emulator(PATH_BRACKETING_IMGS_LEFT, "radiance", "closer_least_sat", COLOR)
     emulator_right_class = Image_Emulator(PATH_BRACKETING_IMGS_RIGHT, "radiance", "closer_least_sat", COLOR)
 
@@ -80,11 +79,15 @@ def emulate(metric_full):
         emulated_image_right = emulator_right_class.emulate_image(exposure_time_target)
 
         if (metric != "classical"):
-            display_left_class.resulting_img(emulated_image_left, action=ACTION, path=SAVE_PATH / f"ae-{metric}", index=timestamp, bit=SAVE_DEPTH, color=COLOR)
-            display_right_class.resulting_img(emulated_image_right, action=ACTION, path=SAVE_PATH / f"ae-{metric}", index=timestamp, bit=SAVE_DEPTH, color=COLOR)
+            img_left = display_class.resulting_img(emulated_image_left, bit=SAVE_DEPTH, color=COLOR)
+            img_right = display_class.resulting_img(emulated_image_right, bit=SAVE_DEPTH, color=COLOR)
         else:
-            display_left_class.resulting_img(emulated_image_left, action=ACTION, path=SAVE_PATH / f"ae-{metric}-{brightness_percentage}", index=timestamp, bit=SAVE_DEPTH, color=COLOR)
-            display_right_class.resulting_img(emulated_image_right, action=ACTION, path=SAVE_PATH / f"ae-{metric}-{brightness_percentage}", index=timestamp, bit=SAVE_DEPTH, color=COLOR)
+            img_left = display_class.resulting_img(emulated_image_left, bit=SAVE_DEPTH, color=COLOR)
+            img_right = display_class.resulting_img(emulated_image_right, bit=SAVE_DEPTH, color=COLOR)
+        if ACTION == "show":
+            display_class.show_imgs(img_left, img_right)
+        elif ACTION == "save":
+            display_class.save_imgs(emulated_image_left, img_left, emulated_image_right, img_right, action=ACTION, path=SAVE_PATH / f"ae-{metric}-{brightness_percentage}", index=timestamp)
         exposure_time_target = metric_class.find_next_exposure_time(emulated_image_left["emulated_img"], exposure_time_target)
 
 def main():
