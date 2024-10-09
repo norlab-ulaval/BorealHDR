@@ -41,14 +41,13 @@ The following steps can be achieved using our [docker image](#docker) (recommend
 
 #### Docker
 
-After cloning the code from github, go to the `BorealHDR/` directory.
-Then, you can open the devcontainer in `vscode` if you are familiar, or build the image with `docker compose up --build`.
+You can open the devcontainer in `vscode` if you are familiar, or build the image with `docker compose up --build`.
 ```bash
-cd .devcontainer/
+cd BorealHDR/.devcontainer/
 docker compose up --build
 ```
 
-After finishing building the docker image, you can connect to it from another terminal
+After finishing building the docker image, you can connect to it from a **new terminal**
 ```bash
 docker exec -it borealhdr_container /bin/bash
 ```
@@ -70,10 +69,9 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-To emulate images, you need to run the script `emulator_threads.py`
+To emulate images, you need to run the script `emulator_threads.py` that you can find in `BorealHDR/scripts/`.
 
 ```bash
-cd BorealHDR/scripts/
 python emulator_threads.py
 ```
 
@@ -114,27 +112,31 @@ BorealHDR contains:
     - IMU measurements
     - GPS data
 
-If you have downloaded the [BorealHDR Dataset](#borealhdr-dataset), the first step is to modify the last line of `.devcontainer/docker-compose.yaml` to mount the location of your data into the container at `/home/user/code/dataset_mount_point/`.
-
 ### Execute code with the actual dataset
 
 We provide a compressed version of the dataset in the [following tables](#download-links). In this version, the images still have a depth of 12-bits, but they have been compressed to reduce the overall size of the dataset. If you are interested by the full resolution version, contact us and we will find a way to share it with you!
 
-Once you downloaded a trajectory, you will have to decompress it before using it with the emulator. You also have to put all the trajectories downloaded in the same folder. You may have to copy-paste the link if directly clicking on `Download` did not work.
+**Once you downloaded a trajectory, you will have to decompress it before using it with the emulator. You also have to put all the trajectories downloaded in the same folder, for exmaple: `dataset/backpack_.../`, and then only mount the `dataset/` folder.**
+
 
 #### Use the dataset with the emulator
 
-If you are using docker, read the next section. Otherwise, you can skip to [here].(#modify-parametersyaml-file)
+If you are using docker, read the next section. Otherwise, you can skip to [here](#modify-parametersyaml-file).
 
 ##### docker
 
-If the container is still running on your computer, you have to stop it first with `ctrl + c` or with `docker compose down`. Then, to mount the dataset into the docker container, you have to add it to the `.BorealHDR/.devcontainer/docker-compose.yaml` file. You want to change the last line to point to your dataset folder path
+If the container is still running on your computer, you have to stop it first with `ctrl + c` or with `docker compose down`. Then, to mount the dataset into the docker container, you have to add it to the `BorealHDR/.devcontainer/docker-compose.yaml` file. You want to change the last line to point to your dataset folder path
 ```yaml
 - <Add directory dataset>:/home/user/code/dataset_mount_point/
 ```
 Save the file and start the container again
 ```bash
 docker compose up
+```
+
+Connect to the docker container from a **new terminal**
+```bash
+docker exec -it borealhdr_container /bin/bash
 ```
 
 ##### Modify parameters.yaml file
@@ -144,7 +146,7 @@ We need to modify the `parameters.yaml` file to point to our dataset. Open the f
 cd BorealHDR/
 micro parameters.yaml
 ```
-Modify the `dataset_folder` parameter to `../dataset_mout_point/` if you are using the docker, or to `<Add directory dataset>` if you are running it locally. Depending on the trajectory you downloaded, you also have to change the `experiment` parameter to the trajectory name (for example: `backpack_2023-09-27-12-51-03`)
+Modify the `dataset_folder` parameter to `../dataset_mount_point/` if you are using the docker, or to `<Add directory dataset>` if you are running it locally. Depending on the trajectory you downloaded, you also have to change the `experiment` parameter to the trajectory name (for example: `backpack_2023-09-27-12-51-03`)
 
 To start the emulation, go to the `scripts` folder and run
 ```bash
@@ -153,6 +155,8 @@ python3 emulator_threads.py
 
 ### Download links
 -------------------------------------------------------------
+
+You may have to copy-paste the link if directly clicking on `Download` did not work.
 
 <div align="center">
 
