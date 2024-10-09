@@ -30,25 +30,30 @@ If you want to use the docker container, you have to install Docker using this w
 
 ### Running the emulator
 
-First, start by cloning this repository on your computer. 
+We will first start by a running a version of the code using a small sample of the dataset and running with the default parameters. 
+
+Start by cloning this repository on your computer. 
 ```bash
 git clone git@github.com:norlab-ulaval/BorealHDR.git
 ```
 
-#### Download the datset
-
-You can download each trajectory independently in [BorealHDR Dataset](#borealhdr-dataset)'s section. Or, we also added a small part of a trajecotry direclty in this repository to allow quick testing of our setup.
+The following steps can be achieved using our [docker image](#docker) (recommended way) or with a standard [python virtual environment](#python-virtual-environment).
 
 #### Docker
 
-If you have downloaded the [BorealHDR Dataset](#borealhdr-dataset), the first step is to modify the last line of `.devcontainer/docker-compose.yaml` to mount the location of your data into the container at `/home/user/code/dataset_mount_point/`.
-
-Then, you can open the devcontainer in `vscode`, or build the image with `docker compose up --build`.
+After cloning the code from github, go to the `BorealHDR/` directory.
+Then, you can open the devcontainer in `vscode` if you are familiar, or build the image with `docker compose up --build`.
 ```bash
+cd .devcontainer/
 docker compose up --build
 ```
 
-When your inside the docker container, you can direclty emulate images from the dataset by running
+After finishing building the docker image, you can connect to it from another terminal
+```bash
+docker exec -it borealhdr_container /bin/bash
+```
+
+When you are inside the docker container, you can direclty emulate images from the dataset by running
 
 ```bash
 cd /home/user/code/scripts/
@@ -65,22 +70,21 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Then, you can adapt the `parameters.yaml` file to define the position of the dataset. The default path to the dataset is to `../data_sample/`. To emulate images, you need to run the script `emulator_threads.py`
+To emulate images, you need to run the script `emulator_threads.py`
 
 ```bash
-cd scripts/
+cd BorealHDR/scripts/
 python emulator_threads.py
 ```
 
 ### Parameters
 
-The `emulator_threads.py` loads `parameters.yaml` file. You can adapt some parameters to choose which automatic-exposure technique to use and also some debugs parameters. Note that `emulator_threads.py` uses multiple threads to accelerate the processes. You can then emulate multiple automatic-exposure algorithms by un-commenting methods in `automatic_exposure_techniques` from `parameters.yaml`. The following table describes the available parameters related to the emulation. 
+The `emulator_threads.py` loads `parameters.yaml` file. You can adapt some parameters, for example, you can select which automatic-exposure technique to use and also some debugs parameters. Note that `emulator_threads.py` uses multiple threads to accelerate the processes. You can then emulate multiple automatic-exposure algorithms by un-commenting methods in `automatic_exposure_techniques` from `parameters.yaml`. The following table describes the available parameters related to the emulation. 
 
 | Parameter                        |                    Description                  | Values (default first) |
 | :---                             |                      :---                         |                   ---: |
 | `exposure_time_init`             | Exposure time of the first emulated image       | `4.0`                       |
-| `dataset_folder`                 | Parent path to the dataset       | `"../data_sample/"`                      |
-| `location_acquisition`           | To select the good folder, choose the location from where the sequence you want to emulate was acquired       | `"ulaval_campus"`<br />`"belair"`<br />`"forest_20"`<br />`"forest_21"`                       |
+| `dataset_folder`                 | Parent path to the dataset ([link to the dataset](#borealhdr-dataset))       | `"../data_sample/"`                      |
 | `experiment`                     | Sequence name       | `"backpack_2023-09-25-15-05-03"`                       |
 | `depth_emulated_imgs`            | Emulate images in 8bits or 12bits       | `8`<br />`12`                       |
 | `emulated_in_color`              | Boolean: Emulate images in color (only for 8bits)       | `True`<br />`False`                       |
@@ -110,12 +114,44 @@ BorealHDR contains:
     - IMU measurements
     - GPS data
 
-### Download
+If you have downloaded the [BorealHDR Dataset](#borealhdr-dataset), the first step is to modify the last line of `.devcontainer/docker-compose.yaml` to mount the location of your data into the container at `/home/user/code/dataset_mount_point/`.
 
-We provide a compressed version of the dataset in the following tables. In this version, the images still have a depth of 12-bits, but they have been compressed to reduce the overall size of the dataset. If you are interested by the full resolution version, contact us and we will find a way to share it with you!
+### Execute code with the actual dataset
 
-Once you downloaded a trajectory, you will have to decompress it before using it with the emulator. You may have to copy-paste the link if directly clicking on `Download` did not work.
+We provide a compressed version of the dataset in the [following tables](#download-links). In this version, the images still have a depth of 12-bits, but they have been compressed to reduce the overall size of the dataset. If you are interested by the full resolution version, contact us and we will find a way to share it with you!
 
+Once you downloaded a trajectory, you will have to decompress it before using it with the emulator. You also have to put all the trajectories downloaded in the same folder. You may have to copy-paste the link if directly clicking on `Download` did not work.
+
+#### Use the dataset with the emulator
+
+If you are using docker, read the next section. Otherwise, you can skip to [here].(#modify-parametersyaml-file)
+
+##### docker
+
+If the container is still running on your computer, you have to stop it first with `ctrl + c` or with `docker compose down`. Then, to mount the dataset into the docker container, you have to add it to the `.BorealHDR/.devcontainer/docker-compose.yaml` file. You want to change the last line to point to your dataset folder path
+```yaml
+- <Add directory dataset>:/home/user/code/dataset_mount_point/
+```
+Save the file and start the container again
+```bash
+docker compose up
+```
+
+##### Modify parameters.yaml file
+
+We need to modify the `parameters.yaml` file to point to our dataset. Open the file using your favorite editor
+```bash
+cd BorealHDR/
+micro parameters.yaml
+```
+Modify the `dataset_folder` parameter to `../dataset_mout_point/` if you are using the docker, or to `<Add directory dataset>` if you are running it locally. Depending on the trajectory you downloaded, you also have to change the `experiment` parameter to the trajectory name (for example: `backpack_2023-09-27-12-51-03`)
+
+To start the emulation, go to the `scripts` folder and run
+```bash
+python3 emulator_threads.py
+```
+
+### Download links
 -------------------------------------------------------------
 
 <div align="center">
