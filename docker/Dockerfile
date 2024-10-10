@@ -6,6 +6,8 @@ ARG USERNAME=user
 ARG PASSWORD=docker
 ARG MY_UID=1000
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y \
         build-essential \
@@ -26,6 +28,7 @@ RUN apt-get install -y \
         python3 \
         python3-dev \
         python3-pip \
+        python3-tk\
         rsync \
         screen \
         software-properties-common \
