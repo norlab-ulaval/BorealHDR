@@ -3,12 +3,16 @@ import os
 from tqdm import tqdm
 import pandas as pd
 import yaml
-import argparse
 from pathlib import Path
 import threading
 
+import cv2
+import matplotlib
+import matplotlib.pyplot as plt
+matplotlib.use('TkAgg')
+
 from classes.class_image_emulator import Image_Emulator
-from classes.class_image_display import Image_Display
+from classes.class_image_display import Display
 
 from classes.class_auto_exposure_methods import Metric
 
@@ -29,35 +33,18 @@ def create_dataframe(path_imgs, bracket_values):
     df.index = bracket_values
     return df
 
-if __name__=="__main__":
-
-    parameters_file = "../parameters.yaml"
-    with open(parameters_file, 'r') as file:
-        parameters = yaml.safe_load(file)
-
-    #######################################################
-    # VARIABLES
-    DATASET_FOLDER = Path(parameters["EMULATION"]["dataset_folder"])
-    EXPERIMENT = parameters["EMULATION"]["experiment"]
-    SAVE_DEPTH = parameters["EMULATION"]["depth_emulated_imgs"]
-    COLOR = parameters["EMULATION"]["emulated_in_color"]
-    AE_METRIC = parameters["EMULATION"]["automatic_exposure_techniques"]
-    ACTION = parameters["EMULATION"]["save_or_show_emulated_imgs"]
-    SAVE_PATH = Path(parameters["EMULATION"]["save_path"]) / EXPERIMENT
-
-    PATH_BRACKETING_IMGS_LEFT = DATASET_FOLDER / EXPERIMENT / "camera_left"
-    PATH_BRACKETING_IMGS_RIGHT = DATASET_FOLDER / EXPERIMENT / "camera_right"
-
-    BRACKETING_VALUES = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 32.0])
-    EXPOSURE_TIME_INIT = parameters["EMULATION"]["exposure_time_init"]
-    #########################################################
+def over_write_experiment_folder(path):
+    if os.path.isdir(path):
+        os.system(f"rm -rf {path}")
+    os.makedirs(path)
+    return
 
 def emulate(metric_full):
 
     metric = metric_full.split("-")[0]
     brightness_percentage = int(metric_full.split("-")[-1])
 
-    display_class = Image_Display()
+    display_class = Display()
     emulator_left_class = Image_Emulator(PATH_BRACKETING_IMGS_LEFT, "radiance", "closer_least_sat", COLOR)
     emulator_right_class = Image_Emulator(PATH_BRACKETING_IMGS_RIGHT, "radiance", "closer_least_sat", COLOR)
 
@@ -65,6 +52,11 @@ def emulate(metric_full):
 
     dataframe_left = create_dataframe(PATH_BRACKETING_IMGS_LEFT, BRACKETING_VALUES)
     dataframe_right = create_dataframe(PATH_BRACKETING_IMGS_RIGHT, BRACKETING_VALUES)
+    
+    if (metric != "classical"):
+        over_write_experiment_folder(SAVE_PATH / f"ae-{metric}")
+    else:
+        over_write_experiment_folder(SAVE_PATH / f"ae-{metric}-{brightness_percentage}")
 
     # INPUT: 6 folders with the trajectory for each bracket time
     # 1) For a timestamp, emulate image with current exposure time
@@ -78,17 +70,39 @@ def emulate(metric_full):
         emulated_image_left = emulator_left_class.emulate_image(exposure_time_target)
         emulated_image_right = emulator_right_class.emulate_image(exposure_time_target)
 
-        if (metric != "classical"):
-            img_left = display_class.resulting_img(emulated_image_left, bit=SAVE_DEPTH, color=COLOR)
-            img_right = display_class.resulting_img(emulated_image_right, bit=SAVE_DEPTH, color=COLOR)
-        else:
-            img_left = display_class.resulting_img(emulated_image_left, bit=SAVE_DEPTH, color=COLOR)
-            img_right = display_class.resulting_img(emulated_image_right, bit=SAVE_DEPTH, color=COLOR)
+        img_left = display_class.resulting_img(emulated_image_left, bit=SAVE_DEPTH, color=COLOR)
+        img_right = display_class.resulting_img(emulated_image_right, bit=SAVE_DEPTH, color=COLOR)
+        
         if ACTION == "show":
             display_class.show_imgs(img_left, img_right)
         elif ACTION == "save":
-            display_class.save_imgs(emulated_image_left, img_left, emulated_image_right, img_right, action=ACTION, path=SAVE_PATH / f"ae-{metric}-{brightness_percentage}", index=timestamp)
+            if (metric != "classical"):
+                display_class.save_imgs(emulated_image_left, img_left, emulated_image_right, img_right, action=ACTION, path=SAVE_PATH / f"ae-{metric}", index=timestamp)
+            else:
+                display_class.save_imgs(emulated_image_left, img_left, emulated_image_right, img_right, action=ACTION, path=SAVE_PATH / f"ae-{metric}-{brightness_percentage}", index=timestamp)
         exposure_time_target = metric_class.find_next_exposure_time(emulated_image_left["emulated_img"], exposure_time_target)
+    return
+    
+parameters_file = "../parameters.yaml"
+with open(parameters_file, 'r') as file:
+    parameters = yaml.safe_load(file)
+
+#######################################################
+# VARIABLES
+DATASET_FOLDER = Path(parameters["EMULATION"]["dataset_folder"])
+EXPERIMENT = parameters["EMULATION"]["experiment"]
+SAVE_DEPTH = parameters["EMULATION"]["depth_emulated_imgs"]
+COLOR = parameters["EMULATION"]["emulated_in_color"]
+AE_METRIC = parameters["EMULATION"]["automatic_exposure_techniques"]
+ACTION = parameters["EMULATION"]["save_or_show_emulated_imgs"]
+SAVE_PATH = Path(parameters["EMULATION"]["save_path"]) / EXPERIMENT
+
+PATH_BRACKETING_IMGS_LEFT = DATASET_FOLDER / EXPERIMENT / "camera_left"
+PATH_BRACKETING_IMGS_RIGHT = DATASET_FOLDER / EXPERIMENT / "camera_right"
+
+BRACKETING_VALUES = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 32.0])
+EXPOSURE_TIME_INIT = parameters["EMULATION"]["exposure_time_init"]
+#########################################################
 
 def main():
 
@@ -102,6 +116,10 @@ def main():
     print("All threads started")
     for index, thread in enumerate(threads):
         thread.join()
+    
+    if ACTION == "save":
+        graphics = Display()
+        graphics.plot_exposure(SAVE_PATH)
 
 
 if __name__ == "__main__":
