@@ -34,7 +34,7 @@ We will first start by a running a version of the code using a small sample of t
 
 Start by cloning this repository on your computer. 
 ```bash
-git clone git@github.com:norlab-ulaval/BorealHDR.git
+git clone -b IROS2024 git@github.com:norlab-ulaval/BorealHDR.git
 ```
 
 The following steps can be achieved using our [docker image](#docker) (recommended way) or with a standard [python virtual environment](#python-virtual-environment).
