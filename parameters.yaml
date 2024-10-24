@@ -2,7 +2,7 @@ EMULATION:
       exposure_time_init: 4.0
       dataset_folder: "../data_sample/"
       experiment: "backpack_2023-09-25-15-05-03"
-      depth_emulated_imgs: 8
+      depth_emulated_imgs: 12
       emulated_in_color: True
       automatic_exposure_techniques: [
             # "classical-30",
@@ -13,5 +13,5 @@ EMULATION:
             # "kim-0",
             # "zhang-0"
             ]
-      save_or_show_emulated_imgs: "show"
+      save_or_show_emulated_imgs: "save"
       save_path: "../output/emulated_images/"

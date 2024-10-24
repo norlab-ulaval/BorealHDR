@@ -34,13 +34,14 @@ class Display():
         return
     
     
-    def save_imgs(self, img_l, img_to_show_l, img_r, img_to_show_r, action="show", path="", index=0):
+    def save_imgs(self, img_l, img_to_show_l, img_r, img_to_show_r, path="", index=0):
         self.verify_if_folder_exist_or_create_it(path)
         for camera, img, img_to_show in zip(["images_left", "images_right"], [img_l, img_r], [img_to_show_l, img_to_show_r]):
             complete_path = path / camera
             self.verify_if_folder_exist_or_create_it(complete_path)
             
-            save_image_filename = f"{index:0>5d}"
+            # save_image_filename = f"{index:0>5d}"
+            save_image_filename = str(img["timestamp"].split(".")[0])
             cv2.imwrite(str(complete_path / f"{save_image_filename}.png"), img_to_show)
             f = open(path / f"times_{camera}.txt","a")
             msg = save_image_filename+" "+str(img["timestamp"].split(".")[0])+" "+str(img["target_exposure_time"])+"\n"

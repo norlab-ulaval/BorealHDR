@@ -5,6 +5,7 @@ import pandas as pd
 import yaml
 from pathlib import Path
 import threading
+import argparse
 
 import cv2
 import matplotlib
@@ -65,6 +66,7 @@ def emulate(metric_full):
 
     exposure_time_target = EXPOSURE_TIME_INIT
     for timestamp in tqdm(range(0, dataframe_left.shape[1]-1)):
+    # for timestamp in tqdm(range(0, 10)):
         emulator_left_class.update_image_list(dataframe_left.loc[:][timestamp].to_list())
         emulator_right_class.update_image_list(dataframe_right.loc[:][timestamp].to_list())
         emulated_image_left = emulator_left_class.emulate_image(exposure_time_target)
@@ -77,31 +79,46 @@ def emulate(metric_full):
             display_class.show_imgs(img_left, img_right)
         elif ACTION == "save":
             if (metric != "classical"):
-                display_class.save_imgs(emulated_image_left, img_left, emulated_image_right, img_right, action=ACTION, path=SAVE_PATH / f"ae-{metric}", index=timestamp)
+                display_class.save_imgs(emulated_image_left, img_left, emulated_image_right, img_right, path=SAVE_PATH / f"ae-{metric}", index=timestamp)
             else:
-                display_class.save_imgs(emulated_image_left, img_left, emulated_image_right, img_right, action=ACTION, path=SAVE_PATH / f"ae-{metric}-{brightness_percentage}", index=timestamp)
+                display_class.save_imgs(emulated_image_left, img_left, emulated_image_right, img_right, path=SAVE_PATH / f"ae-{metric}-{brightness_percentage}", index=timestamp)
         exposure_time_target = metric_class.find_next_exposure_time(emulated_image_left["emulated_img"], exposure_time_target)
     return
-    
-parameters_file = "../parameters.yaml"
-with open(parameters_file, 'r') as file:
-    parameters = yaml.safe_load(file)
+
 
 #######################################################
 # VARIABLES
-DATASET_FOLDER = Path(parameters["EMULATION"]["dataset_folder"])
-EXPERIMENT = parameters["EMULATION"]["experiment"]
-SAVE_DEPTH = parameters["EMULATION"]["depth_emulated_imgs"]
-COLOR = parameters["EMULATION"]["emulated_in_color"]
-AE_METRIC = parameters["EMULATION"]["automatic_exposure_techniques"]
-ACTION = parameters["EMULATION"]["save_or_show_emulated_imgs"]
-SAVE_PATH = Path(parameters["EMULATION"]["save_path"]) / EXPERIMENT
+PARENT_PATH = Path(__file__).resolve().parent
+
+parameters_file = PARENT_PATH / "../parameters.yaml"
+with open(parameters_file, 'r') as file:
+    parameters = yaml.safe_load(file)
+    
+parser = argparse.ArgumentParser(description="Emulate HDR images using different automatic exposure techniques.")
+parser.add_argument('--dataset_folder', type=str, default=parameters["EMULATION"]["dataset_folder"], help='Path to the dataset folder.')
+parser.add_argument('--experiment', type=str, default=parameters["EMULATION"]["experiment"], help='Name of the experiment.')
+parser.add_argument('--depth_emulated_imgs', type=int, default=parameters["EMULATION"]["depth_emulated_imgs"], help='Bit depth of the emulated images.')
+parser.add_argument('--emulated_in_color', type=bool, default=parameters["EMULATION"]["emulated_in_color"], help='Whether to emulate images in color.')
+parser.add_argument('--automatic_exposure_techniques', type=str, nargs='+', default=parameters["EMULATION"]["automatic_exposure_techniques"], help='List of automatic exposure techniques to use.')
+parser.add_argument('--save_or_show_emulated_imgs', type=str, choices=['save', 'show'], default=parameters["EMULATION"]["save_or_show_emulated_imgs"], help='Whether to save or show the emulated images.')
+parser.add_argument('--save_path', type=str, default=parameters["EMULATION"]["save_path"], help='Path to save the emulated images.')
+parser.add_argument('--exposure_time_init', type=float, default=parameters["EMULATION"]["exposure_time_init"], help='Initial exposure time.')
+
+args = parser.parse_args()
+    
+DATASET_FOLDER = PARENT_PATH / Path(args.dataset_folder)
+EXPERIMENT = args.experiment
+SAVE_DEPTH = args.depth_emulated_imgs
+COLOR = args.emulated_in_color
+AE_METRIC = args.automatic_exposure_techniques
+ACTION = args.save_or_show_emulated_imgs
+SAVE_PATH = PARENT_PATH / Path(args.save_path) / EXPERIMENT
 
 PATH_BRACKETING_IMGS_LEFT = DATASET_FOLDER / EXPERIMENT / "camera_left"
 PATH_BRACKETING_IMGS_RIGHT = DATASET_FOLDER / EXPERIMENT / "camera_right"
 
 BRACKETING_VALUES = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 32.0])
-EXPOSURE_TIME_INIT = parameters["EMULATION"]["exposure_time_init"]
+EXPOSURE_TIME_INIT = args.exposure_time_init
 #########################################################
 
 def main():
