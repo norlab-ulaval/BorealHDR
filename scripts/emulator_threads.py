@@ -42,8 +42,12 @@ def over_write_experiment_folder(path):
 
 def emulate(metric_full):
 
-    metric = metric_full.split("-")[0]
-    brightness_percentage = int(metric_full.split("-")[-1])
+    if "-" in metric_full:
+        metric = metric_full.split("-")[0]
+        brightness_percentage = int(metric_full.split("-")[-1])
+    else:
+        metric = metric_full
+        brightness_percentage = None
 
     display_class = Display()
     emulator_left_class = Image_Emulator(PATH_BRACKETING_IMGS_LEFT, "radiance", "closer_least_sat", COLOR)
