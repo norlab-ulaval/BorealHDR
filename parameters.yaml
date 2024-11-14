@@ -8,10 +8,10 @@ EMULATION:
             # "classical-30",
             "classical-50",
             # "classical-70",
-            # "fixed-0",
-            # "shim-0",
-            # "kim-0",
-            # "zhang-0"
+            # "fixed",
+            # "shim",
+            # "kim",
+            # "zhang"
             ]
       save_or_show_emulated_imgs: "save"
       save_path: "../output/emulated_images/"
