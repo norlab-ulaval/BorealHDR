@@ -13,6 +13,11 @@ from scipy.optimize import minimize
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF
 
+from .drl_exposure_ctrl.env import ExposureEnv
+from .drl_exposure_ctrl.agent import Actor
+import torch
+import pathlib
+
 ##################################################################################################################################################
 class Metric():
     def __init__(self, metric_name, brightness_target=50):
@@ -30,6 +35,8 @@ class Metric():
             self.metric_class = Metric_Kim()
         elif self.metric_name == "zhang":
             self.metric_class = Metric_Zhang()
+        elif self.metric_name == "drl_exposure_ctrl":
+            self.metric_class = Metric_Drl_Exposure_Ctrl()
         else:
             raise Exception(f"Method {self.metric_name} not implemented!")
         return
@@ -414,3 +421,78 @@ class Metric_Zhang():
     def img_preproccessing(self, image):
         img = cv2.cvtColor(image, cv2.COLOR_BAYER_RG2GRAY)
         return img
+    
+class Metric_Drl_Exposure_Ctrl():
+    def __init__(self, number_frames_auto=3):
+        self.number_frames_auto = number_frames_auto
+        self.count_number_frames = 0
+
+        self.brightness_target = 50
+        self.classical_auto_exposure = Metric_Classical(self.brightness_target)
+        
+        self.params = {'device': torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"),
+          'state_dim': (4, 84, 84),
+          'action_dim': 1,
+          'len_episode': 100000,
+
+          'env_mode_test': True,
+          'env_data_argumentation': True,
+          'env_seq_filepath': "config/infer.yaml",
+          'env_img_ori_h': 192,
+          'env_img_ori_w': 256,
+          'env_expo_lb': 50,
+          'env_expo_ub': 2000000,
+          'env_expo_init': 10000,
+
+          #   'rwd_mode': "stat",
+          'rwd_mode': "feat",
+          'rwd_mean_target': 0.5,
+          'rwd_w_flk': 0.2,
+          'rwd_w_detect': 0.005,
+          'rwd_w_match': 0.005,
+
+          'sac_hidden_dim': 512
+          }
+        base_path = Path(__file__).parents[0]
+        self.agent = Actor(self.params['state_dim'], self.params['action_dim'], self.params['sac_hidden_dim'])
+        self.agent.load_state_dict(torch.load(f'{base_path}/drl_exposure_ctrl/model/actor_drl_feat_10000.pth'))
+        self.agent.eval()
+        
+        # setup env
+        self.env = ExposureEnv(None, self.params, self.params['len_episode'])
+        self.s_network, _ = self.env.reset(frame_id=0)
+        self.s_network = np.array([])
+        self.s_reward = np.array([])
+        
+        # set first exposure time DRL
+        self.first_frame_DRL = True
+        return
+    
+    def find_next_exposure_time(self, img, exposure_time):
+        img_network_resized = cv2.resize(img, (self.params["state_dim"][1], self.params["state_dim"][2]))
+        img_reward_resized = cv2.resize(img, (self.params["env_img_ori_w"], self.params["env_img_ori_h"]))
+        img_normalized = img_network_resized / 2**12
+        if len(self.s_network) == 0:
+            self.s_network = np.expand_dims(img_normalized, axis=0)
+            self.s_reward = np.expand_dims(img_reward_resized, axis=0)
+        else:
+            self.s_network = np.concatenate((self.s_network, np.expand_dims(img_normalized, axis=0)), axis=0)
+            self.s_reward = np.concatenate((self.s_reward, np.expand_dims(img_reward_resized, axis=0)), axis=0)
+            if self.s_network.shape[0] == 5:
+                self.s_network = self.s_network[1:, :]
+                self.s_reward = self.s_reward[1:, :]
+            
+        if (self.count_number_frames <= self.number_frames_auto):
+            self.count_number_frames += 1
+            next_exposure_time = self.classical_auto_exposure.find_next_exposure_time(img, exposure_time)
+            return next_exposure_time
+        else:
+            if self.first_frame_DRL:
+                self.env.expo = exposure_time * 1000
+                self.first_frame_DRL = False
+            s_in = torch.unsqueeze(torch.tensor(self.s_network, dtype=torch.float), 0)
+            a, _ = self.agent(s_in, True, False)
+            a = a.data.numpy().flatten()[0]
+            s_, r, done, next_exposure_time = self.env.step(a, self.s_reward)
+            self.s = s_
+            return next_exposure_time/1000
