@@ -3,7 +3,7 @@ EMULATION:
       dataset_folder: "../data_sample/"
       experiment: "backpack_2023-09-25-15-05-03"
       depth_emulated_imgs: 12
-      emulated_in_color: True
+      emulated_in_color: False
       automatic_exposure_techniques: [
             # "classical-30",
             "classical-50",
