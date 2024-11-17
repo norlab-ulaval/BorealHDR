@@ -121,6 +121,7 @@ PATH_BRACKETING_IMGS_LEFT = DATASET_FOLDER / EXPERIMENT / "camera_left"
 PATH_BRACKETING_IMGS_RIGHT = DATASET_FOLDER / EXPERIMENT / "camera_right"
 
 BRACKETING_VALUES = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 32.0])
+# BRACKETING_VALUES = np.array([25.0, 100.0, 400.0, 1600.0, 6400.0, 25600.0])/1000.0
 EXPOSURE_TIME_INIT = args.exposure_time_init
 #########################################################
 
