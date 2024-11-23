@@ -50,8 +50,8 @@ def emulate(metric_full):
         brightness_percentage = None
 
     display_class = Display()
-    emulator_left_class = Image_Emulator(PATH_BRACKETING_IMGS_LEFT, "radiance", "closer_least_sat", COLOR)
-    emulator_right_class = Image_Emulator(PATH_BRACKETING_IMGS_RIGHT, "radiance", "closer_least_sat", COLOR)
+    emulator_left_class = Image_Emulator(PATH_BRACKETING_IMGS_LEFT, "radiance", "HIGHERNOSAT", COLOR)
+    emulator_right_class = Image_Emulator(PATH_BRACKETING_IMGS_RIGHT, "radiance", "HIGHERNOSAT", COLOR)
 
     metric_class = Metric(metric, brightness_percentage)
 
@@ -73,7 +73,7 @@ def emulate(metric_full):
         emulator_left_class.update_image_list(dataframe_left.loc[:][timestamp].to_list())
         emulator_right_class.update_image_list(dataframe_right.loc[:][timestamp].to_list())
         emulated_image_left = emulator_left_class.emulate_image(exposure_time_target)
-        emulated_image_right = emulator_right_class.emulate_image(exposure_time_target)
+        emulated_image_right = emulator_right_class.emulate_image(exposure_time_target, emulated_image_left["bracket_idx"])
 
         img_left = display_class.resulting_img(emulated_image_left, bit=SAVE_DEPTH, color=COLOR)
         img_right = display_class.resulting_img(emulated_image_right, bit=SAVE_DEPTH, color=COLOR)
