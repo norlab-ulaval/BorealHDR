@@ -92,9 +92,9 @@ class Image_Emulator:
             self.saturation_levels = np.array(self.under_sat_levels) + np.array(self.over_sat_levels)
 
 
-    def emulate_image(self, target_exp_time):
+    def emulate_image(self, target_exp_time, bracket_idx_left=None):
 
-        bracket_idx = self.select_best_image(target_exp_time)
+        bracket_idx = self.select_best_image(target_exp_time, bracket_idx_left)
         if bracket_idx == -1 : bracket_idx = len(self.bracketing_values)-1
 
         if (self.emulation_method == "linear"):
@@ -115,9 +115,8 @@ class Image_Emulator:
                      "emulated_img":emulated_image,
                      "bracket_idx":bracket_idx}
         return image_dic
-    
 
-    def select_best_image(self, target_exp_time):
+    def select_best_image(self, target_exp_time, bracket_idx_left=None):
 
         SATURATION_THRESHOLD = 0.01
 
@@ -126,6 +125,31 @@ class Image_Emulator:
             bracket_idx = higher_values[0] if len(higher_values) > 0 else -1
             if bracket_idx != 0 and bracket_idx != -1 and self.saturation_levels[bracket_idx] > self.saturation_levels[bracket_idx-1]:
                 bracket_idx -= 1
+        elif (self.selection_method == "HIGHERNOSAT"):
+            if bracket_idx_left is not None:
+                bracket_idx = bracket_idx_left
+                if self.under_sat_levels[bracket_idx] == 1:
+                    print(f"Decompression error in {self.path_bracketing} with {self.bracket_images_filenames[bracket_idx]}")
+                    print(f"Under saturation: {self.under_sat_levels[bracket_idx]}")
+                    if bracket_idx != 0:
+                        bracket_idx -= 1
+                    else:
+                        bracket_idx += 1
+                    return bracket_idx
+            else:
+                higher_values = np.where(self.bracketing_values >= float(target_exp_time))[0]
+                bracket_idx = higher_values[0] if len(higher_values) > 0 else -1
+                # manage decompression errors
+                if self.under_sat_levels[bracket_idx] == 1:
+                    print(f"Decompression error in {self.path_bracketing} with {self.bracket_images_filenames[bracket_idx]}")
+                    print(f"Under saturation: {self.under_sat_levels[bracket_idx]}")
+                    if bracket_idx != 0:
+                        bracket_idx -= 1
+                    else:
+                        bracket_idx += 1
+                    return bracket_idx
+                if bracket_idx != 0 and bracket_idx != -1 and self.over_sat_levels[bracket_idx] > SATURATION_THRESHOLD :
+                    bracket_idx -= 1
         else:
             raise Exception(f"Selection method '{self.selection_method}' not implemented")
         
