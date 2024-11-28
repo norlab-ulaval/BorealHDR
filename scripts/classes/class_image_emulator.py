@@ -36,6 +36,7 @@ class Image_Emulator:
 
         intensity_values = np.linspace(0,4095,256)
         values_inverse_CRF = np.loadtxt(self.base_path / "calibration_files" / "pcalib_inside1.txt")
+        # values_inverse_CRF = np.loadtxt(self.base_path / "calibration_files" / "pcalib_forest2024.txt")
 
         digital_number = intensity_values
         irradiance = values_inverse_CRF*(16.0)
@@ -118,7 +119,7 @@ class Image_Emulator:
 
     def select_best_image(self, target_exp_time, bracket_idx_left=None):
 
-        SATURATION_THRESHOLD = 0.01
+        SATURATION_THRESHOLD = 0.001
 
         if (self.selection_method == "closer_least_sat"):
             higher_values = np.where(self.bracketing_values >= float(target_exp_time))[0]

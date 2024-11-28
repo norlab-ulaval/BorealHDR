@@ -37,6 +37,8 @@ class Metric():
             self.metric_class = Metric_Zhang()
         elif self.metric_name == "drl_exposure_ctrl":
             self.metric_class = Metric_Drl_Exposure_Ctrl()
+        elif self.metric_name == "wang":
+            self.metric_class = Metric_Wang()
         else:
             raise Exception(f"Method {self.metric_name} not implemented!")
         return
@@ -113,8 +115,8 @@ class Metric_Shim():
     
 ################################################################################################################################################
 class Metric_Classical():
-    def __init__(self, brightness_target, proportional_factor=0.002):
-        self.encoding = 12
+    def __init__(self, brightness_target, proportional_factor=0.002, encoding=12):
+        self.encoding = encoding
         self.proportional_factor = proportional_factor
         self.brightness_target = int((brightness_target/100)*(2**self.encoding))
         self.threshold = 15
@@ -309,77 +311,70 @@ class Metric_Zhang():
     """
 
     def __init__(self):
-        self.encoding = 12
-        self.p = 0.8
+        self.encoding = 8
+        self.p = 0.7
+        # self.p = 0.8
         self.k = 5
-        self.gamma = 1e-6
-        self.weights = self.calculate_weight(1200*1920)
-        self.icrf, self.crf, self.icrf_derivative = self.get_response_functions()
+        # self.gamma = 1e-7
+        self.gamma = 1e3
+        # self.gamma = 1e4
+        # self.weights = self.calculate_weight(1200*1920)
+        self.weights = self.create_sine_weights(1200*1920, self.k, self.p)
+        self.icrf_derivative = self.get_response_functions()
 
         self.brightness_target = 50
-        self.classical_auto_exposure = Metric_Classical(self.brightness_target)
+        self.classical_auto_exposure = Metric_Classical(self.brightness_target, self.encoding)
         return
     
     def find_next_exposure_time(self, img, exposure_time):
+        exposure_time = exposure_time*1000
         img_preprocess = self.img_preproccessing(img)
         mean_img = np.mean(img_preprocess)
-        small_bounday = (70/256)*2**self.encoding
-        high_boundary = (190/256)*2**self.encoding
+        small_bounday = 70
+        high_boundary = 190
 
         if ((mean_img <= small_bounday) or (mean_img >= high_boundary)):
-            # print(f"Classical: {mean_img}")
+            print("Classical Auto-Exposure")
             next_exposure_time = self.classical_auto_exposure.find_next_exposure_time(img, exposure_time)
-            # print(f"Next exposure time: {next_exposure_time:.2f} ms")
         else:
-            # print(f"Softperc: {mean_img}")
-            img_derivative_x, img_derivative_y = self.custom_gradient_float(img_preprocess)
+            img_gradient = self.calculate_gradient(img_preprocess)
 
             # Exposure Control
-            icrf_derivative_x, icrf_derivative_y = self.custom_gradient_float(1.0/(self.icrf_derivative(img_preprocess)*exposure_time))
+            icrf_gradient = self.calculate_gradient(1.0/(self.icrf_derivative(img_preprocess)*exposure_time))
 
-            gradient_derivative = 2*((img_derivative_x * icrf_derivative_x) + (img_derivative_y * icrf_derivative_y))
-            arg_sorted = np.argsort(gradient_derivative.ravel())
-            m_softperc_derivative = np.sum(self.weights * gradient_derivative.ravel()[arg_sorted])
+            gradient_derivative = 2*(icrf_gradient*img_gradient)
+            
+            arg_sorted = np.argsort(gradient_derivative)
+            final_gradient = self.handle_over_under_exposed(gradient_derivative, img_preprocess.ravel())
+            # final_gradient = gradient_derivative
+            m_softperc_derivative = np.sum(self.weights * final_gradient[arg_sorted])
 
-            # plt.hist(gradient_derivative.ravel()[arg_sorted], bins=1000)
-            # plt.show()
+            next_exposure_time = exposure_time + self.gamma*m_softperc_derivative # Gamma 0.7
 
-            # print(f"Factor: {self.gamma*m_softperc_derivative}")
-            next_exposure_time = exposure_time + self.gamma*m_softperc_derivative
-            # print(f"Next exposure time: {next_exposure_time:.2f} ms")
-        if next_exposure_time < 0.02:
-            next_exposure_time = 0.02
-            # print(f"Next exposure time: {next_exposure_time:.2f} ms")
+        # if next_exposure_time < 0.02: #lower than camera limit
+        #     next_exposure_time = 0.02
+
+        next_exposure_time = next_exposure_time/1000
         return next_exposure_time
+
+    def handle_over_under_exposed(self, gradient_derivative, img):
+        gradient_derivative[img == 0] = 2.0
+        gradient_derivative[img == 255] = -2.0
+        return gradient_derivative
+    
+    # def calculate_gradient(self, img):
+    #     sobel_gradient_x = cv2.Sobel(img, ddepth=cv2.CV_16UC1, dx=1, dy=0)
+    #     sobel_gradient_y = cv2.Sobel(img, ddepth=cv2.CV_16UC1, dx=0, dy=1)
+    #     return sobel_gradient_x, sobel_gradient_y
     
     def calculate_gradient(self, img):
-        sobel_gradient_x = cv2.Sobel(img, ddepth=cv2.CV_16UC1, dx=1, dy=0)
-        sobel_gradient_y = cv2.Sobel(img, ddepth=cv2.CV_16UC1, dx=0, dy=1)
-        return sobel_gradient_x, sobel_gradient_y
-    
-    def custom_gradient_float(self, img):
-        scharr_kernel_x = np.array([[3, 0, -3],
-                                    [10, 0, -10],
-                                    [3, 0, -3]], dtype=np.float32)
-        scharr_kernel_y = np.array([[3, 10, 3],
-                                    [0, 0, 0],
-                                    [-3, -10, -3]], dtype=np.float32)
-
-        sobel_kernel_x = np.array([[1, 0, -1],
-                                   [2, 0, -2],
-                                   [1, 0, -1]], dtype=np.float32)
-        sobel_kernel_y = np.array([[1, 2, 1],
-                                   [0, 0, 0],
-                                   [-1, -2, -1]], dtype=np.float32)
-
-        simple_kernel_x = np.array([1, 0, -1], dtype=np.float32).reshape((1,3))
-        simple_kernel_y = np.array([[1],
-                                    [0],
-                                    [-1]], dtype=np.float32)
         
-        gradient_x = signal.convolve2d(img, scharr_kernel_x, boundary='symm', mode='same')
-        gradient_y = signal.convolve2d(img, scharr_kernel_y, boundary='symm', mode='same')
-        return np.float128(gradient_x), np.float128(gradient_y)
+        gradient_x = cv2.Scharr(img.astype(np.float32), ddepth=cv2.CV_32FC1, dx=1, dy=0)
+        gradient_x /= 32.0
+        gradient_y = cv2.Scharr(img.astype(np.float32), ddepth=cv2.CV_32FC1, dx=0, dy=1)
+        gradient_y /= 32.0
+        gradient = gradient_x**2 + gradient_y**2                  
+        return gradient.ravel()
     
     def calculate_weight(self, img_size):
         s = img_size
@@ -392,36 +387,283 @@ class Metric_Zhang():
         weight = np.zeros_like(np.arange(0,s, dtype=np.float32), dtype=np.float32)
         weight[first_indexes] = np.sin(((np.pi)/(2*threshold))*first_indexes)**self.k
 
-        weight[last_indexes] = np.sin((np.pi/2) - (np.pi/(2*(s - threshold)))*first_indexes_second_eq)**self.k # Their equations are not true
-        weight = weight/np.linalg.norm(weight)
+        weight[last_indexes] = np.sin((np.pi/2) - (np.pi/(2*(s - threshold)))*first_indexes_second_eq)**self.k # Their equations don't work
+        # weight = weight/np.linalg.norm(weight) # Sum
+        weight = weight/np.sum(weight) # Sum
 
-        # plt.plot(weight)
-        # plt.xlabel("Pixel index")
-        # plt.ylabel("Weight")
-        # plt.show()
         return weight
     
+    def create_sine_weights(self, num, order, percentile_ratio):
+        """
+        Create sine-based weights.
+        
+        Args:
+            num (int): Total number of weights.
+            order (float): Exponent applied to sine values.
+            percentile_ratio (float): Ratio determining the split between the two parts of the sine function.
+            
+        Returns:
+            list: Normalized sine-based weights.
+        """
+        if not (0.0 < percentile_ratio < 1.0):
+            raise ValueError("percentile_ratio must be in the range (0, 1).")
+
+        weights = np.zeros(num)
+        
+        # Determine split points and steps
+        num_first = int(num * percentile_ratio)
+        num_second = num - num_first
+
+        # Generate first part: [0, pi/2]
+        step_first = np.pi / 2 / (num_first - 1)
+        for i in range(num_first):
+            weights[i] = np.sin(i * step_first) ** order
+        weights[num_first - 1] = 1.0  # Explicitly set the last value of the first part
+
+        # Generate second part: (pi/2, pi]
+        step_second = np.pi / 2 / num_second
+        for i in range(num_first, num):
+            weights[i] = np.sin(np.pi / 2 - (i - num_first + 1) * step_second) ** order
+
+        # Normalize weights
+        weights /= np.sum(weights)
+    
+        return weights.tolist()
+    
     def get_response_functions(self):
-        intensity_values = np.linspace(0,4095,256)
+        intensity_values = np.linspace(0,255,256)
         base_path = Path(__file__).parents[2]
-        values_inverse_CRF = np.loadtxt(base_path / "calibration_files" / "pcalib_inside1.txt") #"pcalib_inside2.txt"
+        # values_inverse_CRF = np.loadtxt(base_path / "calibration_files" / "pcalib_inside1.txt") #"pcalib_inside2.txt"
+        values_inverse_CRF = np.loadtxt(base_path / "calibration_files" / "pcalib_forest2024.txt") #"pcalib_inside2.txt"
 
         digital_number = intensity_values
-        irradiance = values_inverse_CRF*(16.0)
-        irradiance[0] = 0
-        irradiance[-1] = 4095
+        # irradiance = values_inverse_CRF*(16.0) # 12bits (2^4)
+        # irradiance[0] = 0
+        # irradiance[-1] = 4095
 
-        icrf = interp1d(digital_number, irradiance, kind='linear', fill_value=(0,4095))
-        crf = interp1d(irradiance, digital_number, kind='linear', fill_value=(0,4095))
+        # icrf = interp1d(digital_number, irradiance, kind='linear', fill_value=(0,4095))
+        # crf = interp1d(irradiance, digital_number, kind='linear', fill_value=(0,4095))
 
-        icrf_derivate = np.diff(icrf(np.linspace(0,4095,4097)))
-        icrf_derivative = UnivariateSpline(np.linspace(0,4095,4096), icrf_derivate)#, fill_value=(0,4095))
-        return icrf, crf, icrf_derivative
+        # icrf_derivate = np.diff(crf(np.linspace(0,4095,4097)))
+        # icrf_derivate = np.diff(icrf(np.linspace(0,4095,4097))) # This is the correct one
+        icrf = np.poly1d(np.polyfit(digital_number, np.log(values_inverse_CRF), 10))
+        icrf_derivative = icrf.deriv()
+        
+        return icrf_derivative
     
     def img_preproccessing(self, image):
         img = cv2.cvtColor(image, cv2.COLOR_BAYER_RG2GRAY)
+        img = (img/16.0).astype(np.uint8)
         return img
+
+
+################################################################################################################################################
+class Metric_Wang():
+    """
+    Zhang: Active Exposure Control for Robust Visual Odometry in HDR Environments (SoftPerceptile)
+    """
+
+    def __init__(self):
+        self.encoding = 8
+        self.lambda_factor = 5.0
+        self.number_iterations = 3
+        self.zeta = 0.001
+        self.k = 0.5
+        self.crf, self.icrf, self.icrf_derivative = self.get_response_functions()
+
+        self.brightness_target = 50
+        self.classical_auto_exposure = Metric_Classical(self.brightness_target, self.encoding)
+        return
     
+    def find_next_exposure_time(self, img, exposure_time):
+        exposure_time = exposure_time
+        img_process = self.img_preproccessing(img)
+    
+        # print("-----------------------------------------------------------")
+        exposure_time_opt, image_opt, gamma_search = self.heuristic_exposure_prediction(img_process, exposure_time)
+        exposure_time_search = exposure_time * (1 + self.k*(gamma_search - 1))
+        
+        # print(f"Update Exposure Time: {(exposure_time_opt - exposure_time) * 0.2}")
+        # exposure_time_search = exposure_time_opt
+        
+        weights = self.calculate_weights(img_process)
+        gradient_img_x, gradient_img_y = self.calculate_gradient(img_process)
+        gradient_opt_x, gradient_opt_y = self.calculate_gradient(1.0/(exposure_time_search * self.icrf_derivative(img_process)))
+        gradient_factor = 2 * weights * (gradient_img_x * gradient_opt_x + gradient_img_y * gradient_opt_y)
+        
+        gradient_factor[image_opt < 30] = 2.0
+        gradient_factor[image_opt > 225] = -2.0
+        
+        # print(f"Number pixel under 30: {np.count_nonzero(image_opt < 30)/len(image_opt.ravel())}")
+        # print(f"Number pixel over 225: {np.count_nonzero(image_opt > 225)/len(image_opt.ravel())}")
+        # print(f"Gradient from saturate pixels: {np.sum(gradient_factor[image_opt < 30]) + np.sum(gradient_factor[image_opt > 225])/np.sum(gradient_factor)}")
+        # print(f"Total gradient: {np.sum(gradient_factor)}")
+        
+        # print(f"Min image optimal: {np.min(image_opt)}")
+        # print(f"Max image optimal: {np.max(image_opt)}")
+        # print(f"Min gradient factor: {np.min(gradient_factor)}")
+        # print(f"Max gradient factor: {np.max(gradient_factor)}")
+        
+        gradient_factor = np.sum(gradient_factor)/np.sum(weights)
+        
+        # print(f"Gradient Factor: {gradient_factor}")
+
+        # if 0.5 < np.abs(gradient_factor) < 2.1:
+        #     exposure_time_refined = exposure_time_search * self.zeta * gradient_factor
+            
+        next_exposure_time = exposure_time_search + self.zeta * gradient_factor
+
+        return next_exposure_time
+    
+    def heuristic_exposure_prediction(self, img, exposure_time, alpha=0.5, beta=2.0):
+        
+        # print(f"Current exposure time: {exposure_time}")
+        t_opt = exposure_time
+        I_opt = img
+        G_opt = self.quality_metric(I_opt)
+        gamma = 1
+        for i in range(self.number_iterations):
+            t_left = alpha * t_opt
+            t_right = beta * t_opt
+            I_emulated_left = self.emulate_image(img, exposure_time, t_left)
+            I_emulated_right = self.emulate_image(img, exposure_time, t_right)
+            G_left = self.quality_metric(I_emulated_left)
+            G_right = self.quality_metric(I_emulated_right)
+            
+            # self.show_images(I_emulated_left, I_opt, I_emulated_right, t_left, t_opt, t_right, G_left, G_opt, G_right)
+            
+            if G_left >= G_opt and G_left >= G_right:
+                # print(f"Left higher than optimal")
+                t_opt = t_left
+                I_opt = I_emulated_left
+                G_opt = G_left
+                gamma *= alpha 
+                beta = 0.5 * (1 + beta)
+            elif G_right >= G_opt:
+                # print(f"Right higher than optimal")
+                t_opt = t_right
+                I_opt = I_emulated_right
+                G_opt = G_right
+                gamma *= beta
+                alpha = 0.5 * (1 + alpha)
+            else:
+                # print(f"Optimal")
+                alpha = 0.5 * (1 + alpha)
+                beta = 0.5 * (1 + beta)
+        
+        # print(f"Optimal exposure time: {t_opt}")
+        return t_opt, I_opt, gamma
+    
+    def show_images(self, img_left, img_opt, img_right, t_left, t_opt, t_right, G_left, G_opt, G_right):
+        fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+        
+        # Original images
+        axes[0, 0].imshow(cv2.cvtColor(img_left, cv2.COLOR_BGR2RGB))
+        axes[0, 0].set_title(f'Left (ET: {t_left})')
+        axes[0, 0].axis('off')
+        
+        axes[0, 1].imshow(cv2.cvtColor(img_opt, cv2.COLOR_BGR2RGB))
+        axes[0, 1].set_title(f'Optimal (ET: {t_opt})')
+        axes[0, 1].axis('off')
+        
+        axes[0, 2].imshow(cv2.cvtColor(img_right, cv2.COLOR_BGR2RGB))
+        axes[0, 2].set_title(f'Right (ET: {t_right})')
+        axes[0, 2].axis('off')
+        
+        # Gradient images
+        grad_left_x, grad_left_y = self.calculate_gradient(img_left)
+        grad_left = np.sqrt(grad_left_x**2 + grad_left_y**2)
+        axes[1, 0].imshow(grad_left, cmap='gray')
+        axes[1, 0].set_title(f'Gradient Left ({G_left*1e-6})')
+        axes[1, 0].axis('off')
+        
+        grad_opt_x, grad_opt_y = self.calculate_gradient(img_opt)
+        grad_opt = np.sqrt(grad_opt_x**2 + grad_opt_y**2)
+        axes[1, 1].imshow(grad_opt, cmap='gray')
+        axes[1, 1].set_title(f'Gradient Optimal ({G_opt*1e-6})')
+        axes[1, 1].axis('off')
+        
+        grad_right_x, grad_right_y = self.calculate_gradient(img_right)
+        grad_right = np.sqrt(grad_right_x**2 + grad_right_y**2)
+        axes[1, 2].imshow(grad_right, cmap='gray')
+        axes[1, 2].set_title(f'Gradient Right ({G_right*1e-6})')
+        axes[1, 2].axis('off')
+        
+        plt.show()
+            
+    def emulate_image(self, img_source, exp_source, exp_target):
+        
+        image_emulated = self.crf(exp_target/exp_source*self.icrf(img_source))
+        image_emulated = np.clip(image_emulated, 0.0, 255.0).astype(np.uint8)
+    
+        return image_emulated
+            
+    def quality_metric(self, img):
+        weights = self.calculate_weights(img)
+        img_gradient_x, img_gradient_y = self.calculate_gradient(img)
+        img_gradient = img_gradient_x**2 + img_gradient_y**2
+        metric = np.sum(np.multiply(weights, img_gradient))
+        
+        return metric
+    
+    def calculate_gradient(self, img):
+        gradient_x = cv2.Sobel(img.astype(np.float64), ddepth=cv2.CV_64FC1, dx=1, dy=0)
+        gradient_y = cv2.Sobel(img.astype(np.float64), ddepth=cv2.CV_64FC1, dx=0, dy=1)              
+        return gradient_x, gradient_y
+    
+    def calculate_weights(self, img):
+        weight = np.zeros_like(img, dtype=np.float32)
+        weight[img < 128] = 1/(1 + self.lambda_factor*np.exp((63.5 - img[img < 128])/5)) - 0.001
+        weight[img >= 128] = 1/(1 + self.lambda_factor*np.exp((img[img >= 128] - 191.5)/5)) - 0.001
+        
+        return weight
+    
+    def get_response_functions(self):
+        intensity_values = np.linspace(0,255,256)
+        base_path = Path(__file__).parents[2]
+        values_inverse_CRF = np.loadtxt(base_path / "calibration_files" / "pcalib_inside1.txt") #"pcalib_inside2.txt"
+        # values_inverse_CRF = np.loadtxt(base_path / "calibration_files" / "pcalib_forest2024.txt") #"pcalib_inside2.txt"
+
+        digital_number = intensity_values
+        crf = np.poly1d(np.polyfit(values_inverse_CRF, digital_number, 5))
+        icrf = np.poly1d(np.polyfit(digital_number, values_inverse_CRF, 5))
+        icrf_derivative = np.poly1d(np.polyfit(digital_number, np.log(values_inverse_CRF), 5))
+        
+        # # Plot the ICRF and CRF side-by-side
+        # fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+
+        # x = np.linspace(0, 255, 256)
+
+        # Plot CRF
+        # y_crf = crf(x)
+        # axes[0].plot(x, y_crf, label='CRF')
+        # axes[0].set_xlabel('Digital Number')
+        # axes[0].set_ylabel('Irradiance')
+        # axes[0].set_title('Camera Response Function (CRF)')
+        # axes[0].legend()
+        # axes[0].grid(True)
+
+        # # Plot ICRF
+        # y_icrf = icrf(x)
+        # axes[1].plot(x, y_icrf, label='ICRF')
+        # axes[1].set_xlabel('Digital Number')
+        # axes[1].set_ylabel('Irradiance')
+        # axes[1].set_title('Inverse Camera Response Function (ICRF)')
+        # axes[1].legend()
+        # axes[1].grid(True)
+
+        # plt.tight_layout()
+        # plt.show()
+        
+        return crf, icrf, icrf_derivative
+    
+    def img_preproccessing(self, image):
+        img = cv2.cvtColor(image, cv2.COLOR_BAYER_RG2GRAY)
+        img = (img/16.0).astype(np.uint8)
+        return img
+
+
+################################################################################################################################################   
 class Metric_Drl_Exposure_Ctrl():
     def __init__(self, number_frames_auto=3):
         self.number_frames_auto = number_frames_auto
