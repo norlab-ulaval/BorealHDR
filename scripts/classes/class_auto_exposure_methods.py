@@ -460,7 +460,7 @@ class Metric_Zhang():
 ################################################################################################################################################
 class Metric_Wang():
     """
-    Zhang: Active Exposure Control for Robust Visual Odometry in HDR Environments (SoftPerceptile)
+    Wang
     """
 
     def __init__(self):
@@ -621,8 +621,8 @@ class Metric_Wang():
     def get_response_functions(self):
         intensity_values = np.linspace(0,255,256)
         base_path = Path(__file__).parents[2]
-        values_inverse_CRF = np.loadtxt(base_path / "calibration_files" / "pcalib_inside1.txt") #"pcalib_inside2.txt"
-        # values_inverse_CRF = np.loadtxt(base_path / "calibration_files" / "pcalib_forest2024.txt") #"pcalib_inside2.txt"
+        # values_inverse_CRF = np.loadtxt(base_path / "calibration_files" / "pcalib_inside1.txt") #"pcalib_inside2.txt"
+        values_inverse_CRF = np.loadtxt(base_path / "calibration_files" / "pcalib_forest2024.txt") #"pcalib_inside2.txt"
 
         digital_number = intensity_values
         crf = np.poly1d(np.polyfit(values_inverse_CRF, digital_number, 5))

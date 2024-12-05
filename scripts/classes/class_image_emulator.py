@@ -35,8 +35,8 @@ class Image_Emulator:
     def get_CRF(self):
 
         intensity_values = np.linspace(0,4095,256)
-        values_inverse_CRF = np.loadtxt(self.base_path / "calibration_files" / "pcalib_inside1.txt")
-        # values_inverse_CRF = np.loadtxt(self.base_path / "calibration_files" / "pcalib_forest2024.txt")
+        # values_inverse_CRF = np.loadtxt(self.base_path / "calibration_files" / "pcalib_inside1.txt")
+        values_inverse_CRF = np.loadtxt(self.base_path / "calibration_files" / "pcalib_forest2024.txt")
 
         digital_number = intensity_values
         irradiance = values_inverse_CRF*(16.0)
