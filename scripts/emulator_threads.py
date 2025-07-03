@@ -1,5 +1,8 @@
-import numpy as np
 import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import numpy as np
 from tqdm import tqdm
 import pandas as pd
 import yaml
@@ -11,10 +14,10 @@ import matplotlib
 import matplotlib.pyplot as plt
 matplotlib.use('TkAgg')
 
-from classes.class_image_emulator import Image_Emulator
-from classes.class_image_display import Display
+from scripts.classes.class_image_emulator import Image_Emulator
+from scripts.classes.class_image_display import Display
 
-from classes.class_auto_exposure_methods import Metric
+from scripts.classes.class_auto_exposure_methods import Metric
 
 import warnings
 from sklearn.exceptions import ConvergenceWarning
@@ -65,6 +68,7 @@ def emulate(metric_full):
 
     exposure_time_target = EXPOSURE_TIME_INIT
     for timestamp in tqdm(range(0, dataframe_left.shape[1]-1)):
+        print(dataframe_left.head())
         emulator_left_class.update_image_list(dataframe_left.loc[:][timestamp].to_list())
         emulator_right_class.update_image_list(dataframe_right.loc[:][timestamp].to_list())
         emulated_image_left = emulator_left_class.emulate_image(exposure_time_target)
@@ -82,8 +86,9 @@ def emulate(metric_full):
                 display_class.save_imgs(emulated_image_left, img_left, emulated_image_right, img_right, action=ACTION, path=SAVE_PATH / f"ae-{metric}-{brightness_percentage}", index=timestamp)
         exposure_time_target = metric_class.find_next_exposure_time(emulated_image_left["emulated_img"], exposure_time_target)
     return
-    
-parameters_file = "../parameters.yaml"
+
+script_path = os.path.dirname(os.path.abspath(__file__))
+parameters_file = os.path.join(script_path, '..', 'parameters.yaml')
 with open(parameters_file, 'r') as file:
     parameters = yaml.safe_load(file)
 
