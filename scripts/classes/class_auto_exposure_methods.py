@@ -13,6 +13,10 @@ from scipy.optimize import minimize
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF
 
+import torch
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
+
 ##################################################################################################################################################
 class Metric():
     def __init__(self, metric_name, brightness_target=50):
@@ -30,6 +34,8 @@ class Metric():
             self.metric_class = Metric_Kim()
         elif self.metric_name == "zhang":
             self.metric_class = Metric_Zhang()
+        elif self.metric_name == "perfect_ae":
+            self.metric_class = Metric_Perfect_AE()
         else:
             raise Exception(f"Method {self.metric_name} not implemented!")
         return
@@ -39,6 +45,43 @@ class Metric():
         return next_exposure_time
 
 
+################################################################################################################################################
+class Metric_Perfect_AE():
+    def __init__(self, model_path="/home/alienware/Documents/end_to_end_AE/output/training/2025-07-08_11-45-12/model.pt"):
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.model = torch.jit.load(model_path)
+        self.model.to(self.device)
+        self.model.eval()
+
+        self.input_size = (640, 480)  # Default input size, can be changed if needed
+        self.transform = A.Compose(
+            [
+                A.Resize(width=self.input_size[0], height=self.input_size[1], p=1),
+                A.Normalize(normalization="min_max", p=1),
+                ToTensorV2(),
+            ]
+        )
+
+    def find_next_exposure_time(self, img, exposure_time):
+        img_preprocess = self.img_preproccessing(img)
+        img_tensor = img_preprocess.to(self.device)
+        with torch.no_grad():
+            output = self.model(img_tensor)
+            next_exposure_time = 2**(output.item()) * exposure_time  # Convert log2 to actual exposure time
+        
+        print(f"Next exposure time: {next_exposure_time:.2f} ms")
+
+        return next_exposure_time
+
+    def img_preproccessing(self, image):
+        if self.transform:
+            augmented = self.transform(image=image)
+            image = augmented["image"]
+        image = image.repeat(1, 3, 1, 1)  # Convert to 3-channel image
+
+        print("Mean image value:", image.mean())
+        return image
+    
 ################################################################################################################################################
 class Metric_Shim():
     """

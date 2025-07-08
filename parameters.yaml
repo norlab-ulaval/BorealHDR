@@ -6,12 +6,13 @@ EMULATION:
       emulated_in_color: True
       automatic_exposure_techniques: [
             # "classical-30",
-            "classical-50",
+            # "classical-50",
             # "classical-70",
             # "fixed-0",
             # "shim-0",
             # "kim-0",
-            # "zhang-0"
+            # "zhang-0",
+            "perfect_ae-0"
             ]
       save_or_show_emulated_imgs: "show"
       save_path: "../output/emulated_images/"

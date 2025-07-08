@@ -68,7 +68,6 @@ def emulate(metric_full):
 
     exposure_time_target = EXPOSURE_TIME_INIT
     for timestamp in tqdm(range(0, dataframe_left.shape[1]-1)):
-        print(dataframe_left.head())
         emulator_left_class.update_image_list(dataframe_left.loc[:][timestamp].to_list())
         emulator_right_class.update_image_list(dataframe_right.loc[:][timestamp].to_list())
         emulated_image_left = emulator_left_class.emulate_image(exposure_time_target)
