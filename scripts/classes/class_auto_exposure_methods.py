@@ -47,7 +47,7 @@ class Metric():
 
 ################################################################################################################################################
 class Metric_Perfect_AE():
-    def __init__(self, model_path="/home/alienware/Documents/end_to_end_AE/output/training/2025-07-08_11-45-12/model.pt"):
+    def __init__(self, model_path="/home/alienware/Documents/end_to_end_AE/output/training/2025-07-29_11-26-22/model.pt"):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = torch.jit.load(model_path)
         self.model.to(self.device)
@@ -69,17 +69,23 @@ class Metric_Perfect_AE():
             output = self.model(img_tensor)
             next_exposure_time = 2**(output.item()) * exposure_time  # Convert log2 to actual exposure time
         
-        print(f"Next exposure time: {next_exposure_time:.2f} ms")
+        # print(f"Next exposure time: {next_exposure_time:.2f} ms")
 
         return next_exposure_time
 
     def img_preproccessing(self, image):
+        # Image is gray scale (no bayer), 1 channel, 12bits
+        image = (image / 16.0).astype(np.uint8)
+
         if self.transform:
             augmented = self.transform(image=image)
             image = augmented["image"]
-        image = image.repeat(1, 3, 1, 1)  # Convert to 3-channel image
 
-        print("Mean image value:", image.mean())
+        # Add batch dimension and ensure correct dtype
+        image = image.unsqueeze(0).float()  # Add batch dimension and convert to float32
+
+        print(f"Image mean: {image.mean().item()}")
+
         return image
     
 ################################################################################################################################################
