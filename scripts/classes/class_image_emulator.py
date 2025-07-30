@@ -18,8 +18,19 @@ class Image_Emulator:
 
         self.base_path = Path(__file__).parents[2]
         self.path_bracketing = path_imgs_bracketing
-        
-        self.bracketing_values = np.array(sorted([float(folder) for folder in os.listdir(self.path_bracketing) if os.path.isdir(self.path_bracketing / folder)]))
+
+        # Collect only folder names that can be converted to float
+        bracketing_folders = []
+        for folder in os.listdir(self.path_bracketing):
+            folder_path = self.path_bracketing / folder
+            if os.path.isdir(folder_path):
+                try:
+                    float(folder)
+                    bracketing_folders.append(folder)
+                except ValueError:
+                    continue
+        self.bracketing_values = np.array(sorted([float(f) for f in bracketing_folders]))
+
         self.emulation_method = emulation_method
         self.selection_method = selection_method
         self.color_bayer = color_bayer
