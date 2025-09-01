@@ -13,6 +13,8 @@ from scipy.optimize import minimize
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF
 
+from .class_pid_controller import SmoothingController
+
 import torch
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
@@ -47,7 +49,9 @@ class Metric():
 
 ################################################################################################################################################
 class Metric_Perfect_AE():
-    def __init__(self, model_path="/home/alienware/Documents/end_to_end_AE/output/training/2025-07-29_11-26-22/model.pt"):
+    # def __init__(self, model_path="/home/alienware/Documents/end_to_end_AE/output/training/2025-07-31_16-25-44/model.pt"):
+    # def __init__(self, model_path="/home/alienware/Documents/end_to_end_AE/output/training/2025-08-28_12-01-44/model.pt"):
+    def __init__(self, model_path="/home/alienware/Documents/end_to_end_AE/output/training/2025-08-31_21-35-22/model.pt"):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = torch.jit.load(model_path)
         self.model.to(self.device)
@@ -62,14 +66,25 @@ class Metric_Perfect_AE():
             ]
         )
 
+        self.smoother = SmoothingController(time_to_target=1/3.6, time_constant_tau=0.5, delay=0)
+
     def find_next_exposure_time(self, img, exposure_time):
         img_preprocess = self.img_preproccessing(img)
         img_tensor = img_preprocess.to(self.device)
         with torch.no_grad():
             output = self.model(img_tensor)
-            next_exposure_time = 2**(output.item()) * exposure_time  # Convert log2 to actual exposure time
-        
-        # print(f"Next exposure time: {next_exposure_time:.2f} ms")
+            ideal_exposure_time = 2**(output.item()) * exposure_time  # Convert log2 to actual exposure time
+
+        # exposure_time_delta = self.smoother.first_order_model(ideal_exposure_time - exposure_time)
+        # next_exposure_time = exposure_time_delta + exposure_time
+
+        # print(f"Ideal exposure time: {ideal_exposure_time} ms")
+
+        next_exposure_time = self.smoother.ema(exposure_time, ideal_exposure_time, alpha=0.3)
+
+        # print(f"Next exposure time after smoothing: {next_exposure_time} ms")
+
+        # next_exposure_time = ideal_exposure_time  # For now, no smoothing applied
 
         return next_exposure_time
 
@@ -84,7 +99,7 @@ class Metric_Perfect_AE():
         # Add batch dimension and ensure correct dtype
         image = image.unsqueeze(0).float()  # Add batch dimension and convert to float32
 
-        print(f"Image mean: {image.mean().item()}")
+        # print(f"Image mean: {image.mean().item()}")
 
         return image
     
