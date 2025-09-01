@@ -1,7 +1,7 @@
 import sys
 import os
 from pathlib import Path
-sys.path.append(Path(__file__).parents[2])
+sys.path.append(str(Path(__file__).parents[2]))
 
 import numpy as np
 import cv2
