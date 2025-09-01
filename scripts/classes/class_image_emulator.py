@@ -19,12 +19,25 @@ class Image_Emulator:
         self.base_path = Path(__file__).parents[2]
         self.path_bracketing = path_imgs_bracketing
         
-        brackets = []
-        # self.bracketing_values = np.array(sorted([float(folder) for folder in os.listdir(self.path_bracketing)]))
+        # brackets = []
+        # # self.bracketing_values = np.array(sorted([float(folder) for folder in os.listdir(self.path_bracketing)]))
+        # for folder in os.listdir(self.path_bracketing):
+        #     if os.path.isdir(self.path_bracketing / folder):
+        #         brackets.append(folder)
+        # self.bracketing_values = np.array(sorted([float(bracket) for bracket in brackets]))
+
+        # Collect only folder names that can be converted to float
+        bracketing_folders = []
         for folder in os.listdir(self.path_bracketing):
-            if os.path.isdir(self.path_bracketing / folder):
-                brackets.append(folder)
-        self.bracketing_values = np.array(sorted([float(bracket) for bracket in brackets]))
+            folder_path = self.path_bracketing / folder
+            if os.path.isdir(folder_path):
+                try:
+                    float(folder)
+                    bracketing_folders.append(folder)
+                except ValueError:
+                    continue
+        self.bracketing_values = np.array(sorted([float(f) for f in bracketing_folders]))
+
         self.emulation_method = emulation_method
         self.selection_method = selection_method
         self.color_bayer = color_bayer
@@ -35,8 +48,8 @@ class Image_Emulator:
     def get_CRF(self):
 
         intensity_values = np.linspace(0,4095,256)
-        # values_inverse_CRF = np.loadtxt(self.base_path / "calibration_files" / "pcalib_inside1.txt")
-        values_inverse_CRF = np.loadtxt(self.base_path / "calibration_files" / "pcalib_forest2024.txt")
+        values_inverse_CRF = np.loadtxt(self.base_path / "calibration_files" / "pcalib_inside1.txt")
+        # values_inverse_CRF = np.loadtxt(self.base_path / "calibration_files" / "pcalib_forest2024.txt")
 
         digital_number = intensity_values
         irradiance = values_inverse_CRF*(16.0)
