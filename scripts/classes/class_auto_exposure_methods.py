@@ -15,8 +15,15 @@ from sklearn.gaussian_process.kernels import RBF
 
 from .drl_exposure_ctrl.env import ExposureEnv
 from .drl_exposure_ctrl.agent import Actor
+
+from .class_pid_controller import SmoothingController
+
 import torch
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
 import pathlib
+import os
+import sys
 
 ##################################################################################################################################################
 class Metric():
@@ -39,6 +46,8 @@ class Metric():
             self.metric_class = Metric_Drl_Exposure_Ctrl()
         elif self.metric_name == "wang":
             self.metric_class = Metric_Wang()
+        elif self.metric_name == "covariance":
+            self.metric_class = Metric_Covariance_AE()
         else:
             raise Exception(f"Method {self.metric_name} not implemented!")
         return
@@ -47,7 +56,64 @@ class Metric():
         next_exposure_time = self.metric_class.find_next_exposure_time(img, exposure_time)
         return next_exposure_time
 
+################################################################################################################################################
+class Metric_Covariance_AE():
+    def __init__(self):
 
+        # Use os.path and sys to get the base path of the current file
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        model_path = os.path.join(base_path, "covariance_ae_models", "model_2025-08-28_12-01-44.pt")
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.model = torch.jit.load(model_path)
+        self.model.to(self.device)
+        self.model.eval()
+
+        self.input_size = (640, 480)  # Default input size, can be changed if needed
+        self.transform = A.Compose(
+            [
+                A.Resize(width=self.input_size[0], height=self.input_size[1], p=1),
+                A.Normalize(normalization="min_max", p=1),
+                ToTensorV2(),
+            ]
+        )
+
+        self.smoother = SmoothingController(time_to_target=1/3.6, time_constant_tau=0.5, delay=0)
+
+    def find_next_exposure_time(self, img, exposure_time):
+        img_preprocess = self.img_preproccessing(img)
+        img_tensor = img_preprocess.to(self.device)
+        with torch.no_grad():
+            output = self.model(img_tensor)
+            ideal_exposure_time = 2**(output.item()) * exposure_time  # Convert log2 to actual exposure time
+
+        # exposure_time_delta = self.smoother.first_order_model(ideal_exposure_time - exposure_time)
+        # next_exposure_time = exposure_time_delta + exposure_time
+
+        # print(f"Ideal exposure time: {ideal_exposure_time} ms")
+
+        next_exposure_time = self.smoother.ema(exposure_time, ideal_exposure_time, alpha=0.3)
+
+        # print(f"Next exposure time after smoothing: {next_exposure_time} ms")
+
+        # next_exposure_time = ideal_exposure_time  # For now, no smoothing applied
+
+        return next_exposure_time
+
+    def img_preproccessing(self, image):
+        # Image is gray scale (no bayer), 1 channel, 12bits
+        image = (image / 16.0).astype(np.uint8)
+
+        if self.transform:
+            augmented = self.transform(image=image)
+            image = augmented["image"]
+
+        # Add batch dimension and ensure correct dtype
+        image = image.unsqueeze(0).float()  # Add batch dimension and convert to float32
+
+        # print(f"Image mean: {image.mean().item()}")
+
+        return image
+    
 ################################################################################################################################################
 class Metric_Shim():
     """
