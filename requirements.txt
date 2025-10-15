@@ -9,3 +9,7 @@ scipy
 pyyaml
 rasterio
 scikit-learn
+torch
+torchvision
+Pillow
+albumentations
