@@ -8,6 +8,7 @@ import pandas as pd
 import yaml
 from pathlib import Path
 import threading
+import torch
 
 import cv2
 import matplotlib
@@ -48,8 +49,8 @@ def emulate(metric_full):
     brightness_percentage = int(metric_full.split("-")[-1])
 
     display_class = Display()
-    emulator_left_class = Image_Emulator(PATH_BRACKETING_IMGS_LEFT, "radiance", "closer_least_sat", COLOR)
-    emulator_right_class = Image_Emulator(PATH_BRACKETING_IMGS_RIGHT, "radiance", "closer_least_sat", COLOR)
+    emulator_left_class = Image_Emulator(PATH_BRACKETING_IMGS_LEFT, "radiance", "closer_least_sat", COLOR, device=DEVICE)
+    emulator_right_class = Image_Emulator(PATH_BRACKETING_IMGS_RIGHT, "radiance", "closer_least_sat", COLOR, device=DEVICE)
 
     metric_class = Metric(metric, brightness_percentage)
 
@@ -66,7 +67,9 @@ def emulate(metric_full):
     # 2) Benchmark -> From the metric, select next exposure time (target)
     # 3) Back to step (1), but with next timestamp
 
-    exposure_time_target = EXPOSURE_TIME_INIT
+    exposure_time_target = torch.tensor(EXPOSURE_TIME_INIT, requires_grad=True, device=DEVICE)
+    emulator_left_class.enable_gradient()
+    emulator_right_class.enable_gradient()
     for timestamp in tqdm(range(0, dataframe_left.shape[1]-1)):
         emulator_left_class.update_image_list(dataframe_left.loc[:][timestamp].to_list())
         emulator_right_class.update_image_list(dataframe_right.loc[:][timestamp].to_list())
@@ -75,7 +78,7 @@ def emulate(metric_full):
 
         img_left = display_class.resulting_img(emulated_image_left, bit=SAVE_DEPTH, color=COLOR)
         img_right = display_class.resulting_img(emulated_image_right, bit=SAVE_DEPTH, color=COLOR)
-        
+
         if ACTION == "show":
             display_class.show_imgs(img_left, img_right)
         elif ACTION == "save":
@@ -83,7 +86,10 @@ def emulate(metric_full):
                 display_class.save_imgs(emulated_image_left, img_left, emulated_image_right, img_right, action=ACTION, path=SAVE_PATH / f"ae-{metric}", index=timestamp)
             else:
                 display_class.save_imgs(emulated_image_left, img_left, emulated_image_right, img_right, action=ACTION, path=SAVE_PATH / f"ae-{metric}-{brightness_percentage}", index=timestamp)
-        exposure_time_target = metric_class.find_next_exposure_time(emulated_image_left["emulated_img"], exposure_time_target)
+        
+        output_img = emulated_image_left["emulated_img"].detach().cpu().numpy().astype(np.uint16)
+        last_exposure_time = exposure_time_target.detach().cpu().numpy()
+        exposure_time_target = torch.tensor(metric_class.find_next_exposure_time(output_img, last_exposure_time), requires_grad=True, device=DEVICE)
     return
 
 script_path = os.path.dirname(os.path.abspath(__file__))
@@ -100,6 +106,8 @@ COLOR = parameters["EMULATION"]["emulated_in_color"]
 AE_METRIC = parameters["EMULATION"]["automatic_exposure_techniques"]
 ACTION = parameters["EMULATION"]["save_or_show_emulated_imgs"]
 SAVE_PATH = Path(parameters["EMULATION"]["save_path"]) / EXPERIMENT
+
+DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 PATH_BRACKETING_IMGS_LEFT = DATASET_FOLDER / EXPERIMENT / "camera_left"
 PATH_BRACKETING_IMGS_RIGHT = DATASET_FOLDER / EXPERIMENT / "camera_right"
