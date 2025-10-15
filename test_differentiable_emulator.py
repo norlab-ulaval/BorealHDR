@@ -61,14 +61,14 @@ def test_differentiable_emulator():
         result = emulator.emulate_image(target_exp_time)
         emulated_img = result["emulated_img"]
 
-        # Convert emulated image to 8-bit before displaying
-        img_np = emulated_img.detach().cpu().numpy()
-        img_np = (img_np / 16.0).astype(np.uint8)
-        img_np = cv2.cvtColor(img_np, cv2.COLOR_BAYER_RG2RGB)
-        cv2.imshow("First Bracket Image", img_np)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-        print(img_np)
+        # # Convert emulated image to 8-bit before displaying
+        # img_np = emulated_img.detach().cpu().numpy()
+        # img_np = (img_np / 16.0).astype(np.uint8)
+        # img_np = cv2.cvtColor(img_np, cv2.COLOR_BAYER_RG2RGB)
+        # cv2.imshow("First Bracket Image", img_np)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+        # print(img_np)
 
         print(f"✓ Emulation successful")
         print(f"✓ Emulated image is tensor: {torch.is_tensor(emulated_img)}")
